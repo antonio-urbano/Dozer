@@ -115,6 +115,8 @@ public class DelayedConsumer extends Thread {
                     //Blocco lavoro
                     this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "completed", System.currentTimeMillis());
                     this.stateStore.writeState(this.registeredQueryName, this.currentAgent);
+                    System.err.println("YYY_DelCons:  " + "DelayedCOns completed");
+
                 }
                 currentAgent.notifyAll();
                 try {

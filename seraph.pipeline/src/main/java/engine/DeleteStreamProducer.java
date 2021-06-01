@@ -27,15 +27,13 @@ public final class DeleteStreamProducer {
 
     private final CurrentAgent currentAgent;
 
-    public DeleteStreamProducer(CurrentAgent currentAgent){
-        this.currentAgent = currentAgent;
-    }
+    public DeleteStreamProducer(CurrentAgent currentAgent){ this.currentAgent = currentAgent; }
 
     public void produceDelayedDeleteCdc(final StreamsBuilder builder, QueryConfiguration queryConfiguration, String tmpDeleteTopicName) {
         PubSubRedisStateStore stateStore = new PubSubRedisStateStore(this.currentAgent);
-        stateStore.subscribeChannel(queryConfiguration.getCypherQuery());
+        stateStore.subscribeChannel(queryConfiguration.getRegisteredQueryName());
         this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
-        stateStore.writeState(queryConfiguration.getCypherQuery(), this.currentAgent);
+        stateStore.writeState(queryConfiguration.getRegisteredQueryName(), this.currentAgent);
 
         JsonSerializer<Neo4jObj> neoJsonSerializer = new JsonSerializer<>();
         JsonDeserializer<Neo4jObj> neoJsonDeserializer = new JsonDeserializer<>(

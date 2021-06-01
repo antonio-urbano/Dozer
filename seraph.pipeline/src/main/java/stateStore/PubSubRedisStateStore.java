@@ -7,27 +7,26 @@ import redis.clients.jedis.JedisPubSub;
 
 public class PubSubRedisStateStore implements SeraphStateStore{
 
+
     final static int JEDIS_PORT = 6379;
     final static String JEDIS_HOST="localhost";
 
-    private RedisPublisher publisher;
-    private RedisSubscriber subscriber;
-    private ObjectMapper mapper;
+
     private final CurrentAgent currentAgent;
 
     public PubSubRedisStateStore(CurrentAgent currentAgent){
-        this.publisher = new RedisPublisher(JEDIS_HOST, JEDIS_PORT);
-        this.subscriber = new RedisSubscriber(JEDIS_HOST, JEDIS_PORT);
-        this.mapper = new ObjectMapper();
         this.currentAgent=currentAgent;
     }
 
     @Override
     public void writeState(String channel, CurrentAgent currentAgent) {
+        RedisPublisher publisher = new RedisPublisher(JEDIS_HOST,JEDIS_PORT);
         String agentString;
+        ObjectMapper mapper = new ObjectMapper();
         try {
             agentString = mapper.writeValueAsString(currentAgent);
-            this.publisher.pub(channel, agentString);
+            publisher.pub(channel, agentString);
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -35,12 +34,10 @@ public class PubSubRedisStateStore implements SeraphStateStore{
 
     @Override
     public void subscribeChannel(String channel) {
+        RedisSubscriber subscriber = new RedisSubscriber(JEDIS_HOST, JEDIS_PORT);
         JedisPubSub listener = new RedisListener(this.currentAgent);
-        this.subscriber.setChannelAndListener(listener,channel);
-        this.subscriber.start();
+        subscriber.setChannelAndListener(listener,channel);
+        subscriber.start();
     }
-
-
-
 
 }

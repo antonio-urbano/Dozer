@@ -9,14 +9,15 @@ import java.util.concurrent.CountDownLatch;
 public class Application {
 
     public static void main(final String[] args) {
-        CurrentAgent currentAgent = new CurrentAgent();
-        DeleteStreamProducer deleteStreamProducer = new DeleteStreamProducer(currentAgent);
-
         final Properties props = ConfigProperties.getStreamsConfig();
         final StreamsBuilder builder = new StreamsBuilder();
+        final CurrentAgent currentAgent = new CurrentAgent();
+
         SeraphQueryParser.parseQuery();
         QueryConfiguration queryConfiguration = QueryConfiguration.getQueryConfiguration();
-        deleteStreamProducer.produceDelayedDeleteCdc(builder, queryConfiguration,"tmpDeleteTopic");
+
+        DeleteStreamProducer deleteStreamProducer = new DeleteStreamProducer(currentAgent);
+        deleteStreamProducer.produceDelayedDeleteCdc(builder, queryConfiguration,"tmpDeleteTopic4");
         Thread cypherThread = new CypherQueryHandler("bolt://localhost:7687", "neo4j", "sink", queryConfiguration, currentAgent);
         Thread delayedConsumerThread = new DelayedConsumer(currentAgent, queryConfiguration.getRegisteredQueryName());
         delayedConsumerThread.start();

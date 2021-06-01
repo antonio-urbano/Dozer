@@ -19,12 +19,10 @@ import java.util.Properties;
 
 public class ConfigProperties {
 
-    private static Properties properties;
 
-    public ConfigProperties(){
-        properties = new Properties();
-    }
+
     public static Properties getStreamsConfig() {
+        Properties properties = new Properties();
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "seraph-engine-app");
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
@@ -33,6 +31,7 @@ public class ConfigProperties {
     }
 
     public static Properties getKafkaProducerProperties() {
+        Properties properties = getStreamsConfig();
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
         return properties;

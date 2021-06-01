@@ -134,15 +134,15 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
 
 
     public void run(){
-        this.stateStore.subscribeChannel("globalStateStore");
+        this.stateStore.subscribeChannel(this.registeredQueryName);
         while (!isInterrupted()){
             synchronized (currentAgent){
-                if(currentAgent.getAgentName().equals("DelayedConsumer") && currentAgent.getStatus().equals("completed")){
-                    this.currentAgent.updateCurrentAgent("CypherHandler", "started", System.currentTimeMillis());
-                    this.stateStore.writeState("globalStateStore", this.currentAgent);
+                if(currentAgent.getAgentName().equals(DelayedConsumer.class.getSimpleName()) && currentAgent.getStatus().equals("completed")){
+                    this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
+                    this.stateStore.writeState(this.registeredQueryName, this.currentAgent);
                     //blocco lavoro
-                    this.currentAgent.updateCurrentAgent("CypherHandler", "completed", System.currentTimeMillis());
-                    this.stateStore.writeState("globalStateStore", this.currentAgent);
+                    this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "completed", System.currentTimeMillis());
+                    this.stateStore.writeState(this.registeredQueryName, this.currentAgent);
                     System.err.println("YYY_CypherHandler:  " + "CypherHandler completed");
                 }
                 currentAgent.notifyAll();
