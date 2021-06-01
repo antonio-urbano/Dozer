@@ -31,23 +31,10 @@ public final class DeleteStreamProducer {
         this.currentAgent = currentAgent;
     }
 
-    public Properties getStreamsConfig() {
-
-        final Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-filter-seraph");
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        return props;
-    }
-
-
-
-    public void filterStream(final StreamsBuilder builder, QueryConfiguration queryConfiguration) {
-        PubSubRedisStateStore stateStore = new PubSubRedisStateStore(this.currentAgent);
-        stateStore.subscribeChannel("globalStateStore");
-        this.currentAgent.updateCurrentAgent("DeleteStreamProducer", "started", System.currentTimeMillis());
+    public void produceDelayedDeleteCdc(final StreamsBuilder builder, QueryConfiguration queryConfiguration) {
+      /*  PubSubRedisStateStore stateStore = new PubSubRedisStateStore(this.currentAgent);
+        stateStore.subscribeChannel(queryConfiguration.getCypherQuery());
+        this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
         stateStore.writeState("globalStateStore", this.currentAgent);
         System.err.println("YYY_DeleteStreamProducer  " + "DeleteStreamProducer started");
 
@@ -80,7 +67,7 @@ public final class DeleteStreamProducer {
 //        stream.process(() -> new UpdateStateStoreProcessor(DeleteStreamProducer.class.getName()));
         stream.to("tmpDeleteTopic", Produced.with(stringSerde, outputObjSerde));
 
-
+*/
     }
 
 

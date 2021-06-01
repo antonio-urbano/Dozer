@@ -2,7 +2,7 @@ package stateStore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import  engine.CurrentAgent;
+import engine.CurrentAgent;
 import redis.clients.jedis.JedisPubSub;
 
 public class PubSubRedisStateStore implements SeraphStateStore{

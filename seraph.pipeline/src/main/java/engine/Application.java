@@ -1,5 +1,6 @@
 package engine;
 
+import config.ConfigProperties;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import java.util.Properties;
@@ -7,10 +8,11 @@ import java.util.concurrent.CountDownLatch;
 
 public class Application {
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) {/*
         CurrentAgent currentAgent = new CurrentAgent();
         DeleteStreamProducer deleteStreamProducer = new DeleteStreamProducer(currentAgent);
-        final Properties props = deleteStreamProducer.getStreamsConfig();
+
+        final Properties props = ConfigProperties.getStreamsConfig();
         final StreamsBuilder builder = new StreamsBuilder();
         SeraphQueryParser.parseQuery();
         QueryConfiguration queryConfiguration = QueryConfiguration.getQueryConfiguration();
@@ -40,6 +42,9 @@ public class Application {
             System.exit(1);
         }
         System.exit(0);
-
+*/
+        System.out.println(DeleteStreamProducer.class.getName());
+        System.out.println(DeleteStreamProducer.class.getCanonicalName());
+        System.out.println(DeleteStreamProducer.class.getSimpleName());
     }
 }
