@@ -3,7 +3,6 @@ package engine;
 
 import seraphGrammar.SeraphParser;
 import seraphGrammar.SeraphParserBaseListener;
-
 import java.time.Duration;
 
 public class QueryConfigListener extends SeraphParserBaseListener {
