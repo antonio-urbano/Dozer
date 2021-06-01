@@ -4,7 +4,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
 public class RedisSubscriber extends Thread{
-    private Jedis jedis;
+    private final Jedis jedis;
     private String channel;
     private JedisPubSub listener;
 
@@ -26,11 +26,7 @@ public class RedisSubscriber extends Thread{
     @Override
     public void run() {
         try{
-//            System.out.println();
-//            System.out.println("---------SUBSCRIBE begins-------");
             subscribe();
-//            System.out.println("----------SUBSCRIBE ends-------");
-//            System.out.println();
         }catch(Exception e){
             e.printStackTrace();
         }

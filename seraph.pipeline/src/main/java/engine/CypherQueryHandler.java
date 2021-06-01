@@ -15,27 +15,28 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
     private final Driver driver;
     private final String cypherQuery;
     private final String kafkaTopic;
-    private PubSubRedisStateStore stateStore;
+    private final String registeredQueryName;
+    private final PubSubRedisStateStore stateStore;
     private final CurrentAgent currentAgent;
 
 
 
 
-    public CypherQueryHandler(String uri, String user, String password, String cypherQuery, String kafkaTopic, CurrentAgent currentAgent)
+    public CypherQueryHandler(String uri, String user, String password, QueryConfiguration qc, CurrentAgent currentAgent)
     {
         driver = GraphDatabase.driver( uri, AuthTokens.basic( user, password ) );
-        this.cypherQuery = cypherQuery;
-        this.kafkaTopic = kafkaTopic;
+        this.cypherQuery = qc.getCypherQuery();
+        this.kafkaTopic = qc.getOutput_topic();
         this.currentAgent = currentAgent;
+        this.registeredQueryName = qc.getRegisteredQueryName();
         this.stateStore = new PubSubRedisStateStore(this.currentAgent);
-        this.stateStore.subscribeChannel("globalStateStore");
+        this.stateStore.subscribeChannel(this.registeredQueryName);
     }
 
 
     public JSONObject runQuery() {
         try (Session session = driver.session()) {
             Result result = session.run(this.cypherQuery);
-
             JSONObject jsonResultRecord = null;
             CypherResultRecord cypherResultRecord;
 
@@ -49,12 +50,11 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
 
             }
 
-                return jsonResultRecord;
-            }
+            return jsonResultRecord;
+        }
     }
 
     private CypherResultRecord checkRecordType(List<Pair<String, Value>> fields) {
-
         CypherResultRecord cypherResultRecord = new CypherResultRecord();
         boolean propertyGraph_flag = false;
         boolean projection_flag = false;
@@ -137,7 +137,7 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
         this.stateStore.subscribeChannel("globalStateStore");
         while (!isInterrupted()){
             synchronized (currentAgent){
-                if(currentAgent.getAgent().equals("DelayedConsumer") && currentAgent.getStatus().equals("completed")){
+                if(currentAgent.getAgentName().equals("DelayedConsumer") && currentAgent.getStatus().equals("completed")){
                     this.currentAgent.updateCurrentAgent("CypherHandler", "started", System.currentTimeMillis());
                     this.stateStore.writeState("globalStateStore", this.currentAgent);
                     //blocco lavoro

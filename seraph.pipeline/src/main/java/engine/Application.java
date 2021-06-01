@@ -8,7 +8,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class Application {
 
-    public static void main(final String[] args) {/*
+    public static void main(final String[] args) {
         CurrentAgent currentAgent = new CurrentAgent();
         DeleteStreamProducer deleteStreamProducer = new DeleteStreamProducer(currentAgent);
 
@@ -16,12 +16,11 @@ public class Application {
         final StreamsBuilder builder = new StreamsBuilder();
         SeraphQueryParser.parseQuery();
         QueryConfiguration queryConfiguration = QueryConfiguration.getQueryConfiguration();
-        deleteStreamProducer.filterStream(builder, queryConfiguration);
-        Thread cypherThread = new CypherQueryHandler("bolt://localhost:7687", "neo4j", "sink", queryConfiguration.getCypherQuery(), queryConfiguration.getOutput_topic(), currentAgent);
-        Thread delayedConsumerThread = new DelayedConsumer(currentAgent);
+        deleteStreamProducer.produceDelayedDeleteCdc(builder, queryConfiguration,"tmpDeleteTopic");
+        Thread cypherThread = new CypherQueryHandler("bolt://localhost:7687", "neo4j", "sink", queryConfiguration, currentAgent);
+        Thread delayedConsumerThread = new DelayedConsumer(currentAgent, queryConfiguration.getRegisteredQueryName());
         delayedConsumerThread.start();
         cypherThread.start();
-
 
         final KafkaStreams streams = new KafkaStreams(builder.build(), props);
         final CountDownLatch latch = new CountDownLatch(1);
@@ -42,9 +41,6 @@ public class Application {
             System.exit(1);
         }
         System.exit(0);
-*/
-        System.out.println(DeleteStreamProducer.class.getName());
-        System.out.println(DeleteStreamProducer.class.getCanonicalName());
-        System.out.println(DeleteStreamProducer.class.getSimpleName());
+
     }
 }

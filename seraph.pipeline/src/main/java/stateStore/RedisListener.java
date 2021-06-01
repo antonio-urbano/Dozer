@@ -8,7 +8,7 @@ import redis.clients.jedis.JedisPubSub;
 public class RedisListener extends JedisPubSub {
 
     private final CurrentAgent currentAgent;
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
 
     public RedisListener(CurrentAgent currentAgent){
@@ -18,16 +18,12 @@ public class RedisListener extends JedisPubSub {
 
     @Override
     public void onMessage(String channel, String message) {
-        CurrentAgent currentAgent = null;
+        CurrentAgent currentAgent;
         try {
             currentAgent = mapper.readValue(message,CurrentAgent.class);
+            this.currentAgent.updateCurrentAgent(currentAgent);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-        }
-        if (currentAgent!=null)
-            this.currentAgent.updateCurrentAgent(currentAgent.getAgent(),currentAgent.getStatus(),currentAgent.getTimestamp());
-        if(message.equalsIgnoreCase("quit")){
-            this.unsubscribe(channel);
         }
     }
 

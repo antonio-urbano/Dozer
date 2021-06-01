@@ -31,12 +31,11 @@ public final class DeleteStreamProducer {
         this.currentAgent = currentAgent;
     }
 
-    public void produceDelayedDeleteCdc(final StreamsBuilder builder, QueryConfiguration queryConfiguration) {
-      /*  PubSubRedisStateStore stateStore = new PubSubRedisStateStore(this.currentAgent);
+    public void produceDelayedDeleteCdc(final StreamsBuilder builder, QueryConfiguration queryConfiguration, String tmpDeleteTopicName) {
+        PubSubRedisStateStore stateStore = new PubSubRedisStateStore(this.currentAgent);
         stateStore.subscribeChannel(queryConfiguration.getCypherQuery());
         this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
-        stateStore.writeState("globalStateStore", this.currentAgent);
-        System.err.println("YYY_DeleteStreamProducer  " + "DeleteStreamProducer started");
+        stateStore.writeState(queryConfiguration.getCypherQuery(), this.currentAgent);
 
         JsonSerializer<Neo4jObj> neoJsonSerializer = new JsonSerializer<>();
         JsonDeserializer<Neo4jObj> neoJsonDeserializer = new JsonDeserializer<>(
@@ -49,10 +48,7 @@ public final class DeleteStreamProducer {
                 OutputObj.class);
         Serde<OutputObj> outputObjSerde = Serdes.serdeFrom(outputSer,
                 outputDeser);
-
-
         final Serde<String> stringSerde = Serdes.String();
-
         long window_range = queryConfiguration.getWindow_time_range();
 
 
@@ -62,18 +58,9 @@ public final class DeleteStreamProducer {
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload()!=null)
                 .filter((_key, neo4jObj) -> neo4jObj.getMeta().get("operation").equals("created"))
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload().get("start")!=null)
-                .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj,k)));
+                .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj)));
 
-//        stream.process(() -> new UpdateStateStoreProcessor(DeleteStreamProducer.class.getName()));
-        stream.to("tmpDeleteTopic", Produced.with(stringSerde, outputObjSerde));
+        stream.to(tmpDeleteTopicName, Produced.with(stringSerde, outputObjSerde));
 
-*/
     }
-
-
-
-
-
-
-
 }

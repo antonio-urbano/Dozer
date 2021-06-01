@@ -1,31 +1,20 @@
 package engine;
 
-import config.ConfigProperties;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.StreamsConfig;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 import stateStore.PubSubRedisStateStore;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 public class DelayedConsumer extends Thread {
 
-    private PubSubRedisStateStore stateStore;
+    private final PubSubRedisStateStore stateStore;
     private final CurrentAgent currentAgent;
+    private final String registeredQueryName;
 
 
-    public DelayedConsumer(CurrentAgent currentAgent){
+
+    public DelayedConsumer(CurrentAgent currentAgent, String registeredQueryName){
         this.currentAgent = currentAgent;
+        this.registeredQueryName = registeredQueryName;
         this.stateStore = new PubSubRedisStateStore(this.currentAgent);
-        this.stateStore.subscribeChannel("globalStateStore");
+        this.stateStore.subscribeChannel(this.registeredQueryName);
     }
 
 
@@ -116,17 +105,16 @@ public class DelayedConsumer extends Thread {
     }*/
 
     public void run(){
-        this.stateStore.subscribeChannel("globalStateStore");
+        this.stateStore.subscribeChannel(this.registeredQueryName);
         while (!isInterrupted()){
             synchronized (currentAgent){
-                if((currentAgent.getAgent().equals("DeleteStreamProducer"))
-                        || (currentAgent.getAgent().equals("CypherHandler") && currentAgent.getStatus().equals("completed"))){
-                    this.currentAgent.updateCurrentAgent("DelayedConsumer", "started", System.currentTimeMillis());
-                    this.stateStore.writeState("globalStateStore", this.currentAgent);
+                if((currentAgent.getAgentName().equals(DeleteStreamProducer.class.getSimpleName()))
+                        || (currentAgent.getAgentName().equals(CypherQueryHandler.class.getSimpleName()) && currentAgent.getStatus().equals("completed"))){
+                    this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
+                    this.stateStore.writeState(this.registeredQueryName, this.currentAgent);
                     //Blocco lavoro
-                    this.currentAgent.updateCurrentAgent("DelayedConsumer", "completed", System.currentTimeMillis());
-                    this.stateStore.writeState("globalStateStore", this.currentAgent);
-                    System.err.println("YYY_DelayedConsumer:  " + "DelayedConsumer completed");
+                    this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "completed", System.currentTimeMillis());
+                    this.stateStore.writeState(this.registeredQueryName, this.currentAgent);
                 }
                 currentAgent.notifyAll();
                 try {
