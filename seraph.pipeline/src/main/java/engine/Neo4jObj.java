@@ -8,12 +8,13 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * This class is used to (de)serialize the record in CDC format
+ * {@see https://neo4j.com/labs/kafka/4.0/producer/}
+ */
 @JsonRootName("neo4jObj")
 public class Neo4jObj implements Serializable {
 
-    /**
-     *
-     */
     private Map meta = new LinkedHashMap();
     private Map payload = new LinkedHashMap();
     private Map schema = new LinkedHashMap();

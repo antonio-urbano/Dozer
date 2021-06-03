@@ -10,12 +10,24 @@ import org.neo4j.driver.internal.value.StringValue;
 import org.neo4j.driver.util.Pair;
 import java.util.List;
 
+/**
+ * Cypher result record format corresponding to the case in which
+ * the fields of the cypher query contains only projections over node/relationships attributes
+ */
 public class ProjectionResultRecord extends CypherResultRecord {
 
     private JSONObject resultRecord;
 
+    /**
+     * The result record consists of:
+     * <ul>
+     *     <li>items: array of projections over nodes/relationships attributes</li>
+     *     <li>registeredQueryName: name of the registered query</li>
+     * </ul>
+     */
     public ProjectionResultRecord(){
         this.resultRecord = new JSONObject();
+        this.resultRecord.put("registeredQueryName", QueryConfiguration.getQueryConfiguration().getRegisteredQueryName());
         this.resultRecord.put("items", new JSONArray());
     }
 
@@ -36,7 +48,6 @@ public class ProjectionResultRecord extends CypherResultRecord {
         }
         itemsArray.put(record);
         this.resultRecord.put("items", itemsArray);
-        this.resultRecord.put("registeredQueryName", QueryConfiguration.getQueryConfiguration().getRegisteredQueryName());
         return this.resultRecord;
     }
 

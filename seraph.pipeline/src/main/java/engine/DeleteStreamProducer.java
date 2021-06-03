@@ -26,6 +26,12 @@ public final class DeleteStreamProducer {
 
     }
 
+    /**
+     * Starting from creation records in CDC format it produces deletion records with a customized timestamp.
+     * These record will be consumed by the {@link DelayedConsumer} to re-produce the record at proper time
+     * @param builder
+     * @param tmpDeleteTopicName temporary topic on which produce deletion record with custom timestamp
+     */
     public void produceDelayedDeleteCdc(final StreamsBuilder builder, String tmpDeleteTopicName) {
 //        PubSubRedisStateStore stateStore = new PubSubRedisStateStore(this.currentAgent);
 //        stateStore.subscribeChannel(queryConfiguration.getRegisteredQueryName());

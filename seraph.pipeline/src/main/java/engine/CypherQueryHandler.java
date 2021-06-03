@@ -70,7 +70,7 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
      * <ul>
      * <li>All the fields belong to the allowed type list and so the result record will contain only projections over node/relationships attributes</li>
      * <li>All the fields are Node and/or Relationships and so the result must have a Property Graph format</li>
-     * <li>Some fields belong to the exception type list, the seraph query will raise an exception</li>
+     * <li>Some fields belong to the exception type list, the engine will raise an exception</li>
      * <li>The fields contain both projection and Nodes/Relationships </li> //todo write how we handle the case
      * </ul>
      * @param fields

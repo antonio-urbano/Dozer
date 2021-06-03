@@ -14,14 +14,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * When all the cypher query fields are Node and/or Relationships,
+ * the result must have a Property Graph format
+ */
 public class PropertyGraphResultRecord extends CypherResultRecord{
 
     private JSONObject resultRecord;
 
+    /**
+     * The result record consists of:
+     * <ul>
+     *     <li>nodes: array of nodes formatted according to PG notation</li>
+     *     <li>edges: array of relationships formatted according to PG notation</li>
+     *     <li>registeredQueryName: name of the registered query</li>
+     * </ul>
+     */
     public PropertyGraphResultRecord(){
         this.resultRecord = new JSONObject();
         this.resultRecord.put("nodes", new JSONArray());
         this.resultRecord.put("edges", new JSONArray());
+        this.resultRecord.put("registeredQueryName", QueryConfiguration.getQueryConfiguration().getRegisteredQueryName());
+
     }
 
 
@@ -45,23 +59,34 @@ public class PropertyGraphResultRecord extends CypherResultRecord{
                 this.resultRecord.put("edges", addJSONObjectToArray(edgesArray, jsonRelationship));
             }
         }
-        this.resultRecord.put("registeredQueryName", QueryConfiguration.getQueryConfiguration().getRegisteredQueryName());
         return this.resultRecord;
     }
 
+    /**
+     * Method used for checking if an element (node/relationship)
+     * already belongs to the corresponding array list
+     * @param jsonArray
+     * @param jsonObject
+     * @return
+     */
     private JSONArray addJSONObjectToArray(JSONArray jsonArray, JSONObject jsonObject){
         for(int i=0;i<jsonArray.length();i++){
             JSONObject jsonObj = (JSONObject) jsonArray.get(i);
             if (jsonObj.get("id").equals(jsonObject.get("id"))) {
-                jsonArray.put(i, jsonObj);
+                jsonArray.put(i, jsonObj);          //todo handle this case (element already exists)
                 return jsonArray;
-
             }
         }
         jsonArray.put(jsonObject);
         return jsonArray;
     }
 
+    /**
+     * Transform a neo4j relationship instance {@link Relationship}
+     * to json object formatted according to PG notation
+     * @param relationship neo4j relationship instance to be transformed
+     * @return the corresponding json object
+     */
     private JSONObject relationshipToJSONRelationship(Relationship relationship) {
 
         JSONObject jsonRel = new JSONObject();
@@ -78,6 +103,12 @@ public class PropertyGraphResultRecord extends CypherResultRecord{
         return jsonRel;
     }
 
+    /**
+     * Transform a neo4j node instance {@link Node}
+     * to json object formatted according to PG notation
+     * @param node neo4j node instance to be transformed
+     * @return the corresponding json object
+     */
     private JSONObject nodeToJSONNode (Node node){
 
         JSONObject jsonNode = new JSONObject();
@@ -88,6 +119,12 @@ public class PropertyGraphResultRecord extends CypherResultRecord{
         return jsonNode;
     }
 
+    /**
+     * Transform the properties associated to a node/relationship instance
+     * into a json object formatted according to PG notation
+     * @param objMap Map of properties, where the key is the property name while the value the property value
+     * @return the corresponding json object
+     */
     private JSONObject propertiesToJSONProperties (Map<String,Object> objMap){
 
         Map<String,ArrayList<Object>> propertiesPG = new HashMap<>();

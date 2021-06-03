@@ -14,6 +14,11 @@ public class RedisListener extends JedisPubSub {
         this.currentAgent = currentAgent;
     }
 
+    /**
+     * When a new message is received, the current agent is updated
+     * @param channel
+     * @param message
+     */
     @Override
     public void onMessage(String channel, String message) {
         CurrentAgent currentAgent;

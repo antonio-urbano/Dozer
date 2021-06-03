@@ -1,5 +1,8 @@
 package engine;
 
+/**
+ * todo javadoc
+ */
 public class QueryConfiguration {
 
     private String input_broker;

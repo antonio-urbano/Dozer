@@ -2,6 +2,12 @@ package engine;
 
 import stateStore.PubSubRedisStateStore;
 
+/**
+ * Component for delaying the consumption of the deletion records.
+ * It maintains the nodes and relationships of the neo4j instance constantly updated,
+ * by consuming records produced with a customized delayed timestamp by the {@link DeleteStreamProducer}
+ * and re-producing these records into another topic at proper time
+ */
 public class DelayedConsumer extends Thread {
 
     private final PubSubRedisStateStore stateStore;
@@ -104,6 +110,7 @@ public class DelayedConsumer extends Thread {
 
     }*/
 
+    //todo javadoc
     public void run(){
 //        this.stateStore.subscribeChannel(this.registeredQueryName);
         while (!isInterrupted()){

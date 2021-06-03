@@ -8,8 +8,13 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import seraphGrammar.SeraphLexer;
 import seraphGrammar.SeraphParser;
 
+
 public class SeraphQueryParser {
 
+    /**
+     * It uses a {@link ParseTreeWalker} to walk the tree created by
+     * parsing the registered query by the {@link QueryConfigListener}
+     */
     public static void parseQuery() {
         CharStream in = CharStreams.fromString("REGISTER QUERY people_to_be_tested {\n" +
                 "FROM STREAM kafka://localhost:9092/eventtopic \n" +

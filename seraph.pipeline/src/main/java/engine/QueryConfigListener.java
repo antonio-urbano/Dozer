@@ -5,6 +5,11 @@ import seraphGrammar.SeraphParser;
 import seraphGrammar.SeraphParserBaseListener;
 import java.time.Duration;
 
+/**
+ * This class is used to parse the registered query and update the important fields used
+ * by all the components of the engine {@link QueryConfiguration}
+ * It extends the {@link SeraphParserBaseListener} to handle a subset of its methods.
+ */
 public class QueryConfigListener extends SeraphParserBaseListener {
     SeraphParser parser;
     QueryConfiguration queryConfiguration = QueryConfiguration.getQueryConfiguration();
