@@ -22,9 +22,11 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
 
 
 
-    public CypherQueryHandler(String uri, String user, String password, QueryConfiguration qc, CurrentAgent currentAgent)
+    public CypherQueryHandler(String uri, String user, String password, CurrentAgent currentAgent)
     {
-        driver = GraphDatabase.driver( uri, AuthTokens.basic( user, password ) );
+        QueryConfiguration qc = QueryConfiguration.getQueryConfiguration();
+
+        this.driver = GraphDatabase.driver( uri, AuthTokens.basic( user, password ) );
         this.cypherQuery = qc.getCypherQuery();
         this.kafkaTopic = qc.getOutput_topic();
         this.currentAgent = currentAgent;
@@ -134,7 +136,7 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
 
 
     public void run(){
-        this.stateStore.subscribeChannel(this.registeredQueryName);
+//        this.stateStore.subscribeChannel(this.registeredQueryName);
         while (!isInterrupted()){
             synchronized (currentAgent){
                 if(currentAgent.getAgentName().equals(DelayedConsumer.class.getSimpleName()) && currentAgent.getStatus().equals("completed")){

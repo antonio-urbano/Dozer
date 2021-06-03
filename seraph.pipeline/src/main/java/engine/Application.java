@@ -14,12 +14,10 @@ public class Application {
         final CurrentAgent currentAgent = new CurrentAgent();
 
         SeraphQueryParser.parseQuery();
-        QueryConfiguration queryConfiguration = QueryConfiguration.getQueryConfiguration();
-
         DeleteStreamProducer deleteStreamProducer = new DeleteStreamProducer(currentAgent);
-        deleteStreamProducer.produceDelayedDeleteCdc(builder, queryConfiguration,"tmpDeleteTopic4");
-        Thread cypherThread = new CypherQueryHandler("bolt://localhost:7687", "neo4j", "sink", queryConfiguration, currentAgent);
-        Thread delayedConsumerThread = new DelayedConsumer(currentAgent, queryConfiguration.getRegisteredQueryName());
+        deleteStreamProducer.produceDelayedDeleteCdc(builder,"tmpDeleteTopic4");
+        Thread cypherThread = new CypherQueryHandler("bolt://localhost:7687", "neo4j", "sink", currentAgent);
+        Thread delayedConsumerThread = new DelayedConsumer(currentAgent);
         delayedConsumerThread.start();
         cypherThread.start();
 

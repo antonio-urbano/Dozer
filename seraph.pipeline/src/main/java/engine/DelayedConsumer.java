@@ -10,9 +10,9 @@ public class DelayedConsumer extends Thread {
 
 
 
-    public DelayedConsumer(CurrentAgent currentAgent, String registeredQueryName){
+    public DelayedConsumer(CurrentAgent currentAgent){
         this.currentAgent = currentAgent;
-        this.registeredQueryName = registeredQueryName;
+        this.registeredQueryName = QueryConfiguration.getQueryConfiguration().getRegisteredQueryName();
         this.stateStore = new PubSubRedisStateStore(this.currentAgent);
         this.stateStore.subscribeChannel(this.registeredQueryName);
     }
@@ -105,7 +105,7 @@ public class DelayedConsumer extends Thread {
     }*/
 
     public void run(){
-        this.stateStore.subscribeChannel(this.registeredQueryName);
+//        this.stateStore.subscribeChannel(this.registeredQueryName);
         while (!isInterrupted()){
             synchronized (currentAgent){
                 if((currentAgent.getAgentName().equals(DeleteStreamProducer.class.getSimpleName()))

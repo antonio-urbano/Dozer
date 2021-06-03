@@ -26,14 +26,24 @@ import java.util.concurrent.CountDownLatch;
 public final class DeleteStreamProducer {
 
     private final CurrentAgent currentAgent;
+    private final PubSubRedisStateStore stateStore;
+    private final String registeredQueryName;
+    private final long windowRange;
 
-    public DeleteStreamProducer(CurrentAgent currentAgent){ this.currentAgent = currentAgent; }
+    public DeleteStreamProducer(CurrentAgent currentAgent){
+        this.currentAgent = currentAgent;
+        this.stateStore = new PubSubRedisStateStore(this.currentAgent);
+        this.registeredQueryName = QueryConfiguration.getQueryConfiguration().getRegisteredQueryName();
+        this.stateStore.subscribeChannel(this.registeredQueryName);
+        this.windowRange = QueryConfiguration.getQueryConfiguration().getWindow_time_range();
 
-    public void produceDelayedDeleteCdc(final StreamsBuilder builder, QueryConfiguration queryConfiguration, String tmpDeleteTopicName) {
-        PubSubRedisStateStore stateStore = new PubSubRedisStateStore(this.currentAgent);
-        stateStore.subscribeChannel(queryConfiguration.getRegisteredQueryName());
+    }
+
+    public void produceDelayedDeleteCdc(final StreamsBuilder builder, String tmpDeleteTopicName) {
+//        PubSubRedisStateStore stateStore = new PubSubRedisStateStore(this.currentAgent);
+//        stateStore.subscribeChannel(queryConfiguration.getRegisteredQueryName());
         this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
-        stateStore.writeState(queryConfiguration.getRegisteredQueryName(), this.currentAgent);
+        stateStore.writeState(this.registeredQueryName, this.currentAgent);
 
         JsonSerializer<Neo4jObj> neoJsonSerializer = new JsonSerializer<>();
         JsonDeserializer<Neo4jObj> neoJsonDeserializer = new JsonDeserializer<>(
@@ -47,11 +57,11 @@ public final class DeleteStreamProducer {
         Serde<OutputObj> outputObjSerde = Serdes.serdeFrom(outputSer,
                 outputDeser);
         final Serde<String> stringSerde = Serdes.String();
-        long window_range = queryConfiguration.getWindow_time_range();
+//        long window_range = queryConfiguration.getWindow_time_range();
 
 
 
-       KStream<String,OutputObj> stream = builder.stream("relationships", Consumed.with(Serdes.String(), neoSerde).withTimestampExtractor(new CustomerExtractor(window_range)))
+       KStream<String,OutputObj> stream = builder.stream("relationships", Consumed.with(Serdes.String(), neoSerde).withTimestampExtractor(new CustomerExtractor(this.windowRange)))
                 .filter((_key, neo4jObj) -> neo4jObj!=null)
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload()!=null)
                 .filter((_key, neo4jObj) -> neo4jObj.getMeta().get("operation").equals("created"))
