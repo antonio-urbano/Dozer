@@ -7,20 +7,20 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.StreamsConfig;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class ConfigProperties {
+/**
+ * This class provides a set of method for the Kafka configuration
+ */
+public class KafkaConfigProperties {
 
-
-
+    /**
+     * @return the properties associated to the streams config {@link StreamsConfig}
+     */
     public static Properties getStreamsConfig() {
         Properties properties = new Properties();
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "seraph-engine-app");
@@ -30,6 +30,9 @@ public class ConfigProperties {
         return properties;
     }
 
+    /**
+     * @return the kafka producer configs {@link ProducerConfig}
+     */
     public static Properties getKafkaProducerProperties() {
         Properties properties = getStreamsConfig();
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -37,6 +40,11 @@ public class ConfigProperties {
         return properties;
     }
 
+    /**
+     * The consumer will be built using the ConsumerFactory pattern {@link org.springframework.kafka.core.ConsumerFactory}
+     * to allow to consume complex records where the value corresponds to the Neo4jObj object
+     * @return the kafka consumer configs {@link ConsumerConfig}
+     */
     public static Map<String, Object> getKafkaConsumerProperties() {
         Map<String, Object> props = new HashMap<>();
 

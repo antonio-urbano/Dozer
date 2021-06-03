@@ -14,7 +14,7 @@ public class DelayedConsumer extends Thread {
         this.currentAgent = currentAgent;
         this.registeredQueryName = QueryConfiguration.getQueryConfiguration().getRegisteredQueryName();
         this.stateStore = new PubSubRedisStateStore(this.currentAgent);
-        this.stateStore.subscribeChannel(this.registeredQueryName);
+        this.stateStore.readState(this.registeredQueryName);
     }
 
 
@@ -22,7 +22,7 @@ public class DelayedConsumer extends Thread {
 /*
     static void delayedStream_seek(TopicPartition topicPartition, String outputTopic) {
 
-        ConsumerFactory<String, Neo4jObj> cf = new DefaultKafkaConsumerFactory<>(ConfigProperties.getKafkaConsumerProperties());
+        ConsumerFactory<String, Neo4jObj> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties());
         Consumer<String, Neo4jObj> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartition));
 

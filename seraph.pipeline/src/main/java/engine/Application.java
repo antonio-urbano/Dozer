@@ -1,6 +1,6 @@
 package engine;
 
-import config.ConfigProperties;
+import config.KafkaConfigProperties;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import java.util.Properties;
@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 public class Application {
 
     public static void main(final String[] args) {
-        final Properties props = ConfigProperties.getStreamsConfig();
+        final Properties props = KafkaConfigProperties.getStreamsConfig();
         final StreamsBuilder builder = new StreamsBuilder();
         final CurrentAgent currentAgent = new CurrentAgent();
 

@@ -3,7 +3,10 @@ package engine;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.streams.processor.TimestampExtractor;
 
-
+/**
+ * Custom time stamp extractor {@link TimestampExtractor}
+ * to add a delay equals to the window time range to the kafka record built-in timestamp
+ */
 public class CustomerExtractor implements TimestampExtractor {
     long window_range;
 

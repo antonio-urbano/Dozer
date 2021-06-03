@@ -1,6 +1,6 @@
 package engine;
 
-import config.ConfigProperties;
+import config.KafkaConfigProperties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -13,7 +13,7 @@ public class KafkaResultProducer {
     private final Producer<String, Map<String,Object>> kafkaProducer;
 
     public KafkaResultProducer(){
-        this.kafkaProducer = new KafkaProducer<>(ConfigProperties.getKafkaProducerProperties());
+        this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
     }
 
     public void producerResultRecord(String outputTopic, JSONObject message) {

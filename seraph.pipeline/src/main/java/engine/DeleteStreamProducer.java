@@ -1,26 +1,13 @@
 package engine;
 
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
-import seraphGrammar.SeraphLexer;
-import seraphGrammar.SeraphParser;
 import stateStore.PubSubRedisStateStore;
-
-import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
 
 
 public final class DeleteStreamProducer {
@@ -34,7 +21,7 @@ public final class DeleteStreamProducer {
         this.currentAgent = currentAgent;
         this.stateStore = new PubSubRedisStateStore(this.currentAgent);
         this.registeredQueryName = QueryConfiguration.getQueryConfiguration().getRegisteredQueryName();
-        this.stateStore.subscribeChannel(this.registeredQueryName);
+        this.stateStore.readState(this.registeredQueryName);
         this.windowRange = QueryConfiguration.getQueryConfiguration().getWindow_time_range();
 
     }

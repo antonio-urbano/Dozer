@@ -5,5 +5,5 @@ import engine.CurrentAgent;
 public interface SeraphStateStore {
 
     void writeState(String channel, CurrentAgent message);
-    void subscribeChannel(String channel);
+    void readState(String channel);
 }

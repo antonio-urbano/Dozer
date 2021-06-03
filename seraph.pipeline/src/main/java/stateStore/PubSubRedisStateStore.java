@@ -33,7 +33,7 @@ public class PubSubRedisStateStore implements SeraphStateStore{
     }
 
     @Override
-    public void subscribeChannel(String channel) {
+    public void readState(String channel) {
         RedisSubscriber subscriber = new RedisSubscriber(JEDIS_HOST, JEDIS_PORT);
         JedisPubSub listener = new RedisListener(this.currentAgent);
         subscriber.setChannelAndListener(listener,channel);

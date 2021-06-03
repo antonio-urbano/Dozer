@@ -10,6 +10,10 @@ import stateStore.PubSubRedisStateStore;
 
 import java.util.List;
 
+/**
+ * Component in charge of handling the cypher query
+ */
+
 public class CypherQueryHandler extends Thread implements AutoCloseable{
 
     private final Driver driver;
@@ -19,23 +23,24 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
     private final PubSubRedisStateStore stateStore;
     private final CurrentAgent currentAgent;
 
-
-
-
     public CypherQueryHandler(String uri, String user, String password, CurrentAgent currentAgent)
     {
         QueryConfiguration qc = QueryConfiguration.getQueryConfiguration();
-
         this.driver = GraphDatabase.driver( uri, AuthTokens.basic( user, password ) );
         this.cypherQuery = qc.getCypherQuery();
         this.kafkaTopic = qc.getOutput_topic();
         this.currentAgent = currentAgent;
         this.registeredQueryName = qc.getRegisteredQueryName();
         this.stateStore = new PubSubRedisStateStore(this.currentAgent);
-        this.stateStore.subscribeChannel(this.registeredQueryName);
+        this.stateStore.readState(this.registeredQueryName);
     }
 
 
+    /**
+     * Establish the connection with the neo4j instance and run the cypher query
+     * The result is then transformed in proper json format {@link CypherResultRecord}
+     * @return
+     */
     public JSONObject runQuery() {
         try (Session session = driver.session()) {
             Result result = session.run(this.cypherQuery);
@@ -56,6 +61,21 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
         }
     }
 
+    /**
+     * <p>
+     * This method inspects the fields of the cypher query and it establishes
+     * the record type
+     * </p>
+     * We can have the following cases:
+     * <ul>
+     * <li>All the fields belong to the allowed type list and so the result record will contain only projections over node/relationships attributes</li>
+     * <li>All the fields are Node and/or Relationships and so the result must have a Property Graph format</li>
+     * <li>Some fields belong to the exception type list, the seraph query will raise an exception</li>
+     * <li>The fields contain both projection and Nodes/Relationships </li> //todo write how we handle the case
+     * </ul>
+     * @param fields
+     * @return the record type to decide later the proper output json format
+     */
     private CypherResultRecord checkRecordType(List<Pair<String, Value>> fields) {
         CypherResultRecord cypherResultRecord = new CypherResultRecord();
         boolean propertyGraph_flag = false;
@@ -135,6 +155,7 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
     }*/
 
 
+    // TODO javadoc
     public void run(){
 //        this.stateStore.subscribeChannel(this.registeredQueryName);
         while (!isInterrupted()){
