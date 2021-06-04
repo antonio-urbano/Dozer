@@ -17,6 +17,7 @@ public class Application {
         DeleteStreamProducer deleteStreamProducer = new DeleteStreamProducer();
         Thread cypherThread = new CypherQueryHandler("bolt://localhost:7687", "neo4j", "sink");
         Thread delayedConsumerThread = new DelayedConsumer();
+
         deleteStreamProducer.produceDelayedDeleteCdc(builder,"tmpDeleteTopic4");
         delayedConsumerThread.start();
         cypherThread.start();
