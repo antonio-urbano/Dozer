@@ -11,13 +11,13 @@ public class Application {
     public static void main(final String[] args) {
         final Properties props = KafkaConfigProperties.getStreamsConfig();
         final StreamsBuilder builder = new StreamsBuilder();
-        final CurrentAgent currentAgent = new CurrentAgent();
+//        final CurrentAgent currentAgent = new CurrentAgent();
 
         SeraphQueryParser.parseQuery();
-        DeleteStreamProducer deleteStreamProducer = new DeleteStreamProducer(currentAgent);
+        DeleteStreamProducer deleteStreamProducer = new DeleteStreamProducer();
+        Thread cypherThread = new CypherQueryHandler("bolt://localhost:7687", "neo4j", "sink");
+        Thread delayedConsumerThread = new DelayedConsumer();
         deleteStreamProducer.produceDelayedDeleteCdc(builder,"tmpDeleteTopic4");
-        Thread cypherThread = new CypherQueryHandler("bolt://localhost:7687", "neo4j", "sink", currentAgent);
-        Thread delayedConsumerThread = new DelayedConsumer(currentAgent);
         delayedConsumerThread.start();
         cypherThread.start();
 

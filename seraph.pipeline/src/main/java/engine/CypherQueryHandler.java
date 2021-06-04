@@ -23,13 +23,13 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
     private final PubSubRedisStateStore stateStore;
     private final CurrentAgent currentAgent;
 
-    public CypherQueryHandler(String uri, String user, String password, CurrentAgent currentAgent)
+    public CypherQueryHandler(String uri, String user, String password)
     {
         QueryConfiguration qc = QueryConfiguration.getQueryConfiguration();
         this.driver = GraphDatabase.driver( uri, AuthTokens.basic( user, password ) );
         this.cypherQuery = qc.getCypherQuery();
         this.kafkaTopic = qc.getOutput_topic();
-        this.currentAgent = currentAgent;
+        this.currentAgent = new CurrentAgent();
         this.registeredQueryName = qc.getRegisteredQueryName();
         this.stateStore = new PubSubRedisStateStore(this.currentAgent);
         this.stateStore.readState(this.registeredQueryName);
@@ -157,27 +157,13 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
 
     // TODO javadoc
     public void run(){
-//        this.stateStore.subscribeChannel(this.registeredQueryName);
-        while (!isInterrupted()){
-            synchronized (currentAgent){
-                if(currentAgent.getAgentName().equals(DelayedConsumer.class.getSimpleName()) && currentAgent.getStatus().equals("completed")){
-                    this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
-                    this.stateStore.writeState(this.registeredQueryName, this.currentAgent);
-                    //blocco lavoro
-                    this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "completed", System.currentTimeMillis());
-                    this.stateStore.writeState(this.registeredQueryName, this.currentAgent);
-                    System.err.println("YYY_CypherHandler:  " + "CypherHandler completed");
-                }
-                currentAgent.notifyAll();
-                try {
-                    currentAgent.wait();
-                } catch (InterruptedException e) {
-                    /*TODO
-                    writeState(Cypher completed or interrupted)
-                     */
-                    e.printStackTrace();
-                    interrupt();
-                }
+        while (true){
+            if(this.currentAgent.getAgentName().equals(DelayedConsumer.class.getSimpleName()) && this.currentAgent.getStatus().equals("completed")){
+                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started"));
+                System.err.println("YYY_CypherHandler:  " + "CypherHandler started");
+                //blocco lavoro
+                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "completed"));
+                System.err.println("YYY_CypherHandler:  " + "CypherHandler completed");
             }
         }
     }

@@ -16,8 +16,8 @@ public class DelayedConsumer extends Thread {
 
 
 
-    public DelayedConsumer(CurrentAgent currentAgent){
-        this.currentAgent = currentAgent;
+    public DelayedConsumer(){
+        this.currentAgent = new CurrentAgent();
         this.registeredQueryName = QueryConfiguration.getQueryConfiguration().getRegisteredQueryName();
         this.stateStore = new PubSubRedisStateStore(this.currentAgent);
         this.stateStore.readState(this.registeredQueryName);
@@ -112,29 +112,14 @@ public class DelayedConsumer extends Thread {
 
     //todo javadoc
     public void run(){
-//        this.stateStore.subscribeChannel(this.registeredQueryName);
-        while (!isInterrupted()){
-            synchronized (currentAgent){
-                if((currentAgent.getAgentName().equals(DeleteStreamProducer.class.getSimpleName()))
-                        || (currentAgent.getAgentName().equals(CypherQueryHandler.class.getSimpleName()) && currentAgent.getStatus().equals("completed"))){
-                    this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
-                    this.stateStore.writeState(this.registeredQueryName, this.currentAgent);
-                    //Blocco lavoro
-                    this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "completed", System.currentTimeMillis());
-                    this.stateStore.writeState(this.registeredQueryName, this.currentAgent);
-                    System.err.println("YYY_DelCons:  " + "DelayedCOns completed");
-
-                }
-                currentAgent.notifyAll();
-                try {
-                    currentAgent.wait();
-                } catch (InterruptedException e) {
-                    /* TODO
-                    writeState(Cypher completed or interrupted)
-                     */
-                    e.printStackTrace();
-                    interrupt();
-                }
+        while (true){
+            if((this.currentAgent.getAgentName().equals(DeleteStreamProducer.class.getSimpleName()))
+                    || (this.currentAgent.getAgentName().equals(CypherQueryHandler.class.getSimpleName()) && this.currentAgent.getStatus().equals("completed"))){
+                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started"));
+                System.err.println("YYY_DelCons:  " + "DelayedCons started");
+                //Blocco lavoro
+                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "completed"));
+                System.err.println("YYY_DelCons:  " + "DelayedCOns completed");
             }
         }
     }

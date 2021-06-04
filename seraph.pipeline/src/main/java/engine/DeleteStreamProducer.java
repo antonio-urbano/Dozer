@@ -17,8 +17,8 @@ public final class DeleteStreamProducer {
     private final String registeredQueryName;
     private final long windowRange;
 
-    public DeleteStreamProducer(CurrentAgent currentAgent){
-        this.currentAgent = currentAgent;
+    public DeleteStreamProducer(){
+        this.currentAgent = new CurrentAgent();
         this.stateStore = new PubSubRedisStateStore(this.currentAgent);
         this.registeredQueryName = QueryConfiguration.getQueryConfiguration().getRegisteredQueryName();
         this.stateStore.readState(this.registeredQueryName);
@@ -35,8 +35,10 @@ public final class DeleteStreamProducer {
     public void produceDelayedDeleteCdc(final StreamsBuilder builder, String tmpDeleteTopicName) {
 //        PubSubRedisStateStore stateStore = new PubSubRedisStateStore(this.currentAgent);
 //        stateStore.subscribeChannel(queryConfiguration.getRegisteredQueryName());
-        this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
-        stateStore.writeState(this.registeredQueryName, this.currentAgent);
+//        System.err.println("KKK_DelStreamProd:  " + this.currentAgent.getAgentName() + "  " + this.currentAgent.getStatus());
+//        this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
+//        System.err.println("KKK_DelStreamProd_2: " + this.currentAgent.getAgentName() + "  " + this.currentAgent.getStatus());
+        this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started"));
 
         JsonSerializer<Neo4jObj> neoJsonSerializer = new JsonSerializer<>();
         JsonDeserializer<Neo4jObj> neoJsonDeserializer = new JsonDeserializer<>(
