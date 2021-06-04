@@ -1,0 +1,116 @@
+{
+    "agentName": "SeraphQueryParser",
+    "status": "started",
+    "metadata": {
+        "timestamp": 
+    }
+}
+
+{
+    "agentName": "SeraphQueryParser",
+    "status": "completed",
+    "payload": {
+        "query_id": "cicciobenzina",
+        "input_stream": "kafka://input",
+        "window_size": "PT1H",
+        "starting_from": "earliest",
+        "output_stream": "kafka://output",
+        "emit": "snapshop",
+        "every": "PT5M"
+    }
+}
+
+{
+    "agentName": "DeleteStreamProducer",
+    "status": "started",
+    "payload": {
+        "window_size": "PT1H"
+    }
+}
+
+// legge primo dato del topic:
+// timestamp: 2021-06-04 10:00:00
+
+{
+    "agentName": "SeraphQueryTicker",
+    "status": "next",
+    "payload": {
+        "timestamp_to_sync": "2021-06-04 10:00:00",
+    }
+}
+
+{
+    "agentName": "TimeManagedConsumer",
+    "status": "started",
+    "payload": {
+        "timestamp_to_sync": "2021-06-04 10:00:00",
+    }
+}
+
+{
+    "agentName": "TimeManagedConsumer",
+    "status": "completed",
+    "payload": {
+        "timestamp_to_sync": "2021-06-04 10:00:00",
+    }
+}
+
+{
+    "agentName": "CypherQueryHandler",
+    "status": "started",
+    "payload": {
+        "timestamp_to_sync": "2021-06-04 10:00:00",
+    }
+}
+
+{
+    "agentName": "CypherQueryHandler",
+    "status": "completed",
+    "payload": {
+        "timestamp_to_sync": "2021-06-04 10:00:00",
+        "output_topic": "kafka://output"
+    }
+}
+
+{
+    "agentName": "SeraphQueryTicker",
+    "status": "next",
+    "payload": {
+        "timestamp_to_sync": "2021-06-04 10:05:00",
+    }
+}
+
+{
+    "agentName": "TimeManagedConsumer",
+    "status": "started",
+    "payload": {
+        "timestamp_to_sync": "2021-06-04 10:05:00",
+    }
+}
+
+{
+    "agentName": "TimeManagedConsumer",
+    "status": "completed",
+    "payload": {
+        "timestamp_to_sync": "2021-06-04 10:05:00",
+    }
+}
+...
+
+{
+    "agentName": "SeraphQueryTicker",
+    "status": "next",
+    "payload": {
+        "timestamp_to_sync": "2021-06-04 16:00:00",
+    }
+}
+
+
+
+insertion_stream (sempre aggiornato a t= now()) 
+delete_stream [quello generato da DeleteStreamProducer] (sempre aggiornato a t= now()) 
+
+TimeManagedConsumer source: insertion_stream target: neo4j_topic
+TimeManagedConsumer source: delete_stream target: neo4j_topic
+
+neo4j_topic -> neo4j
