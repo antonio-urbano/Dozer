@@ -9,6 +9,8 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 import stateStore.PubSubRedisStateStore;
 
+import java.util.Date;
+
 
 public final class DeleteStreamProducer {
 
@@ -22,7 +24,6 @@ public final class DeleteStreamProducer {
     public DeleteStreamProducer(){
         this.isReady = initParams();
         if (this.isReady) {
-//            this.currentAgent = new CurrentAgent();
             this.stateStore = new PubSubRedisStateStore(new CurrentAgent());
             this.stateStore.readState(this.registeredQueryName);
         }
@@ -44,7 +45,7 @@ public final class DeleteStreamProducer {
 
     /**
      * Starting from creation records in CDC format it produces deletion records with a customized timestamp.
-     * These record will be consumed by the {@link DelayedConsumer} to re-produce the record at proper time
+     * These record will be consumed by the {@link TimeManagedConsumer} to re-produce the record at proper time
      * @param builder
      * @param tmpDeleteTopicName temporary topic on which produce deletion record with custom timestamp
      */
@@ -55,8 +56,13 @@ public final class DeleteStreamProducer {
 //        this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
 //        System.err.println("KKK_DelStreamProd_2: " + this.currentAgent.getAgentName() + "  " + this.currentAgent.getStatus());
 
+        System.err.println("YYY_DeleteStream:  " + "started  " + new Date(this.timestamp_to_sync));
         this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started", this.timestamp_to_sync));
-
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         JsonSerializer<Neo4jObj> neoJsonSerializer = new JsonSerializer<>();
         JsonDeserializer<Neo4jObj> neoJsonDeserializer = new JsonDeserializer<>(

@@ -8,6 +8,7 @@ import org.neo4j.driver.internal.value.RelationshipValue;
 import org.neo4j.driver.util.Pair;
 import stateStore.PubSubRedisStateStore;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,7 +30,6 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
     {
         this.isReady = initParams();
         if (this.isReady) {
-//            QueryConfiguration qc = QueryConfiguration.getQueryConfiguration();
             this.driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password));
             this.currentAgent = new CurrentAgent();
             this.stateStore = new PubSubRedisStateStore(this.currentAgent);
@@ -153,7 +153,7 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
         this.stateStore.readState("globalStateStore");
         while (true) {
             synchronized (monitor) {
-                    while (!CurrentAgent.getCurrentAgent().equals(DelayedConsumer.class.getName())) {
+                    while (!CurrentAgent.getCurrentAgent().equals(TimeManagedConsumer.class.getName())) {
                         try {
                             monitor.wait();
                         } catch (InterruptedException e) {
@@ -173,14 +173,23 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
 
     // TODO javadoc
     public void run(){
-        System.err.println("KKKK: " + this.currentAgent.getAgentName());
-        while (true){
-            if(this.currentAgent.getAgentName().equals(DelayedConsumer.class.getSimpleName()) && this.currentAgent.getStatus().equals("completed")){
-                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started", this.timestamp_to_sync));
-                System.err.println("YYY_CypherHandler:  " + "CypherHandler started");
-                //blocco lavoro
-                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "completed", this.timestamp_to_sync));
-                System.err.println("YYY_CypherHandler:  " + "CypherHandler completed");
+        if (currentAgent != null) {
+            while (isReady) {
+                if (this.currentAgent.getAgentName().equals(TimeManagedConsumer.class.getSimpleName()) && this.currentAgent.getStatus().equals("completed")) {
+                    this.timestamp_to_sync = this.currentAgent.getTimestamp_to_sync();
+//                System.err.println("YYY_CypherHandler:  " + "CypherHandler started  " + new Date(this.timestamp_to_sync));
+//                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started", this.timestamp_to_sync));
+                    //blocco lavoro
+                    System.err.println("YYY_CypherHandler:  " + "CypherHandler completed  " + new Date(this.timestamp_to_sync));
+
+
+                    this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "completed", this.timestamp_to_sync));
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }

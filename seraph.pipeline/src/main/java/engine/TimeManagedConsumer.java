@@ -2,13 +2,15 @@ package engine;
 
 import stateStore.PubSubRedisStateStore;
 
+import java.util.Date;
+
 /**
  * Component for delaying the consumption of the deletion records.
  * It maintains the nodes and relationships of the neo4j instance constantly updated,
  * by consuming records produced with a customized delayed timestamp by the {@link DeleteStreamProducer}
  * and re-producing these records into another topic at proper time
  */
-public class DelayedConsumer extends Thread {
+public class TimeManagedConsumer extends Thread {
 
     private PubSubRedisStateStore stateStore;
     private CurrentAgent currentAgent;
@@ -18,7 +20,7 @@ public class DelayedConsumer extends Thread {
 
 
 
-    public DelayedConsumer(){
+    public TimeManagedConsumer(){
         this.isReady = initParams();
         if (this.isReady) {
             this.currentAgent = new CurrentAgent();
@@ -111,11 +113,11 @@ public class DelayedConsumer extends Thread {
                             offset_to_read = r.offset();
                             seek_flag = false;
                         }
-                        this.stateStore.writeState("globalStateStore", DelayedConsumer.class.getName());
+                        this.stateStore.writeState("globalStateStore", TimeManagedConsumer.class.getName());
                         seek_flag = true;
                     }
                 }else {
-                    this.stateStore.writeState("globalStateStore", DelayedConsumer.class.getName());
+                    this.stateStore.writeState("globalStateStore", TimeManagedConsumer.class.getName());
                     try {
                         monitor.wait();
                     } catch (InterruptedException e) {
@@ -127,8 +129,7 @@ public class DelayedConsumer extends Thread {
 
     }*/
 
-    //todo javadoc
-    public void run(){
+  /*  public void run(){
         while (true){
             if((this.currentAgent.getAgentName().equals(DeleteStreamProducer.class.getSimpleName()))
                     || (this.currentAgent.getAgentName().equals(CypherQueryHandler.class.getSimpleName()) && this.currentAgent.getStatus().equals("completed"))){
@@ -139,20 +140,34 @@ public class DelayedConsumer extends Thread {
                 System.err.println("YYY_DelCons:  " + "DelayedCOns completed");
             }
         }
-    }
+    }*/
 
-    /*public void run(){
-        while (true) {
-            synchronized (monitor) {
-                this.stateStore.writeState("globalStateStore", "DelayedCons");
-                this.stateStore.readState("globalStateStore");
-                if (CurrentAgent.getCurrentAgent() != null)
-                    System.err.println("XXX_DelCons: " + CurrentAgent.getCurrentAgent());
-                else System.err.println("XXX_DelCons: " + "null");
+    //todo javadoc
+    public void run(){
+        while (isReady) {
+            if (currentAgent != null) {
+                if ((this.currentAgent.getAgentName().equals(SeraphQueryTicker.class.getSimpleName())
+                        && this.currentAgent.getStatus().equals("next"))) {
+                    this.timestamp_to_sync = this.currentAgent.getTimestamp_to_sync();
+//                System.err.println("YYY_ManagedConsumer:  " + "started  " + new Date(this.timestamp_to_sync));
+
+//                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started", this.timestamp_to_sync));
+                    /// blocco di lavoro
+                    System.err.println("YYY_ManagedConsumer:  " + "completed  " + new Date(this.timestamp_to_sync));
+
+                    this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "completed", this.timestamp_to_sync));
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
             }
         }
     }
-*/
+
+
 
     /*public static void main(final String[] args) {
         delayedStream_seek(new TopicPartition("tmpDeleteTopic", 0), "delayedDelete");

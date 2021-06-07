@@ -15,16 +15,17 @@ public class Application {
         SeraphQueryParser seraphQueryParser = new SeraphQueryParser();
         seraphQueryParser.parseQuery();
 
-
+        Thread seraphQueryTicker = new SeraphQueryTicker();
         DeleteStreamProducer deleteStreamProducer = new DeleteStreamProducer();
         Thread cypherThread = new CypherQueryHandler("bolt://localhost:7687", "neo4j", "sink");
-        Thread delayedConsumerThread = new DelayedConsumer();
+        Thread timeManagedConsumer = new TimeManagedConsumer();
 
         if (deleteStreamProducer.isReady()) // todo else case
             deleteStreamProducer.produceDelayedDeleteCdc(builder,"tmpDeleteTopic4");
 
         //todo handle thread and isReady
-        delayedConsumerThread.start();
+        seraphQueryTicker.start();
+        timeManagedConsumer.start();
         cypherThread.start();
 
 

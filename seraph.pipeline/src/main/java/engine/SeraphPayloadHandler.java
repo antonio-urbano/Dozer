@@ -18,15 +18,10 @@ import java.util.Map;
 
 public class SeraphPayloadHandler {
 
-    final static String REGISTERED_QUERIES_TOPIC="registered-queries-topic15";
+    final static String REGISTERED_QUERIES_TOPIC="registered-queries-topic19";
 
-    public void updateTimeToSync(SeraphPayload payload){
-        if (payload.getTimestamp_to_sync()==null)
-            payload.setTimestamp_to_sync(readFirstTimestampToSync());
-        else payload.setTimestamp_to_sync(payload.getTimestamp_to_sync()+payload.getEmit_time_range());
-    }
 
-    private Long readFirstTimestampToSync() {
+    private Long getInitTimeToSync() {
         ConsumerRecord<String, ?> relationshipRecord =consumeFirstRecord(Neo4jObj.class,new TopicPartition("relationships", 0));
         if (relationshipRecord!=null)
             return relationshipRecord.timestamp();
@@ -37,6 +32,7 @@ public class SeraphPayloadHandler {
     public void writePayloadIntoKafka(SeraphPayload payload){
         Producer<String, SeraphPayload> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
         kafkaProducer.flush();
+        payload.setTimestamp_to_sync(getInitTimeToSync());
         kafkaProducer.send(new ProducerRecord<>(REGISTERED_QUERIES_TOPIC, payload));
     }
 
