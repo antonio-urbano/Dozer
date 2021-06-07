@@ -2,6 +2,8 @@ package engine;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -19,33 +21,39 @@ public class CurrentAgent {
 
     private String agentName;
     private String status;
-    private long timestamp;
+    private Long timestamp_to_sync;
+//    private Map<String,Object> payload;
 
 
     @JsonCreator
     public CurrentAgent(){}
 
     @JsonIgnore
-    public CurrentAgent(String agent, String status){
+    public CurrentAgent(String agent, String status, Long timestamp_to_sync){
         this.agentName = agent;
         this.status = status;
-        this.timestamp = System.currentTimeMillis();
+        this.timestamp_to_sync = timestamp_to_sync;
+//        this.payload = new HashMap<>();
     }
+
 
     /**
      * This method is called every time a component read from the state store
      * @param agent     the class name of the component currently performing operations
      * @param status    the status of the current components -- may be "started" or "completed"
-     * @param timestamp the timestamp when the current component has written on the seraph state store its status
+     * @param timestamp_to_sync the timestamp when the current component has written on the seraph state store its status
      */
     @JsonIgnore
-    public void updateCurrentAgent(String agent, String status, long timestamp){
+    public void updateCurrentAgent(String agent, String status, Long timestamp_to_sync){
         this.agentName = agent;
         this.status = status;
-        this.timestamp = timestamp;
+        this.timestamp_to_sync = timestamp_to_sync;
     }
 
     public String getAgentName() { return agentName; }
     public String getStatus() { return status;  }
-    public long getTimestamp() { return timestamp; }
+    public Long getTimestamp_to_sync() { return timestamp_to_sync; }
+//    public Map<String, Object> getPayload() { return payload; }
+
+
 }

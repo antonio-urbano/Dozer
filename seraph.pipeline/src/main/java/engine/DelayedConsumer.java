@@ -10,19 +10,35 @@ import stateStore.PubSubRedisStateStore;
  */
 public class DelayedConsumer extends Thread {
 
-    private final PubSubRedisStateStore stateStore;
-    private final CurrentAgent currentAgent;
-    private final String registeredQueryName;
+    private PubSubRedisStateStore stateStore;
+    private CurrentAgent currentAgent;
+    private String registeredQueryName;
+    private Long timestamp_to_sync;
+    private final boolean isReady;
 
 
 
     public DelayedConsumer(){
-        this.currentAgent = new CurrentAgent();
-        this.registeredQueryName = QueryConfiguration.getQueryConfiguration().getRegisteredQueryName();
-        this.stateStore = new PubSubRedisStateStore(this.currentAgent);
-        this.stateStore.readState(this.registeredQueryName);
+        this.isReady = initParams();
+        if (this.isReady) {
+            this.currentAgent = new CurrentAgent();
+            this.stateStore = new PubSubRedisStateStore(this.currentAgent);
+            this.stateStore.readState(this.registeredQueryName);
+        }
     }
 
+    private boolean initParams(){
+        SeraphPayloadHandler payloadHandler = new SeraphPayloadHandler();
+        SeraphPayload payload = payloadHandler.readPayloadFromKafka();
+        if (payload!=null){
+            this.registeredQueryName = payload.getQuery_id();
+            this.timestamp_to_sync = payload.getTimestamp_to_sync();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isReady() { return this.isReady; }
 
 
 /*
@@ -37,6 +53,7 @@ public class DelayedConsumer extends Thread {
         long offset_to_read = consumer.beginningOffsets(Collections.singletonList(topicPartition)).get(topicPartition);
         long last_pushed_offset = -1;
         boolean seek_flag = true;
+
 
         while (true){
             if (seek_flag)
@@ -115,10 +132,10 @@ public class DelayedConsumer extends Thread {
         while (true){
             if((this.currentAgent.getAgentName().equals(DeleteStreamProducer.class.getSimpleName()))
                     || (this.currentAgent.getAgentName().equals(CypherQueryHandler.class.getSimpleName()) && this.currentAgent.getStatus().equals("completed"))){
-                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started"));
+                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started", this.timestamp_to_sync));
                 System.err.println("YYY_DelCons:  " + "DelayedCons started");
                 //Blocco lavoro
-                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "completed"));
+                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "completed", this.timestamp_to_sync));
                 System.err.println("YYY_DelCons:  " + "DelayedCOns completed");
             }
         }

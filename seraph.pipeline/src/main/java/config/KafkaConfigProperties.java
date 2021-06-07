@@ -45,14 +45,14 @@ public class KafkaConfigProperties {
      * to allow to consume complex records where the value corresponds to the Neo4jObj object
      * @return the kafka consumer configs {@link ConsumerConfig}
      */
-    public static Map<String, Object> getKafkaConsumerProperties() {
+    public static Map<String, Object> getKafkaConsumerProperties(Class<?> deserializerClass) {
         Map<String, Object> props = new HashMap<>();
 
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "delayed-consumer");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, Neo4jObj.class);
+        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, deserializerClass);
 
         return props;
     }

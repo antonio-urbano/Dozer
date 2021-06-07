@@ -25,7 +25,7 @@ public class RedisListener extends JedisPubSub {
         ObjectMapper mapper = new ObjectMapper();
         try {
             currentAgent = mapper.readValue(message,CurrentAgent.class);
-            this.currentAgent.updateCurrentAgent(currentAgent.getAgentName(),currentAgent.getStatus(),currentAgent.getTimestamp());
+            this.currentAgent.updateCurrentAgent(currentAgent.getAgentName(),currentAgent.getStatus(),currentAgent.getTimestamp_to_sync());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

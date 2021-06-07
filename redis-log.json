@@ -11,12 +11,12 @@
     "status": "completed",
     "payload": {
         "query_id": "cicciobenzina",
-        "input_stream": "kafka://input",
+        "input_stream_topic": "kafka://input",
         "window_size": "PT1H",
-        "starting_from": "earliest",
-        "output_stream": "kafka://output",
-        "emit": "snapshop",
-        "every": "PT5M"
+        "time_instant": "earliest",
+        "output_stream_topic": "kafka://output",
+        "streaming_operator": "snapshop",
+        "every_time_operator": "PT5M"
     }
 }
 
@@ -68,7 +68,7 @@
     "status": "completed",
     "payload": {
         "timestamp_to_sync": "2021-06-04 10:00:00",
-        "output_topic": "kafka://output"
+        "output_stream_topic": "kafka://output"
     }
 }
 

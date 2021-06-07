@@ -36,7 +36,7 @@ public class OutputObj implements Serializable {
         this.setBefore((Map) this.neo4jObj.getPayload().get("after"));
         this.setAfter(null);
         this.meta.put("operation", "deleted");
-        this.meta.computeIfPresent("timestamp", (k,v)-> ((long)v)+60000);
+        this.meta.computeIfPresent("timestamp", (k,v)-> ((long)v)+60000); // todo change with window value
 
     }
 

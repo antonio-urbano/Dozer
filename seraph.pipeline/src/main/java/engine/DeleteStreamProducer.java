@@ -12,19 +12,35 @@ import stateStore.PubSubRedisStateStore;
 
 public final class DeleteStreamProducer {
 
-    private final CurrentAgent currentAgent;
-    private final PubSubRedisStateStore stateStore;
-    private final String registeredQueryName;
-    private final long windowRange;
+//    private CurrentAgent currentAgent;
+    private PubSubRedisStateStore stateStore;
+    private String registeredQueryName;
+    private Long emit_time_range;
+    private Long timestamp_to_sync;
+    private final boolean isReady;
 
     public DeleteStreamProducer(){
-        this.currentAgent = new CurrentAgent();
-        this.stateStore = new PubSubRedisStateStore(this.currentAgent);
-        this.registeredQueryName = QueryConfiguration.getQueryConfiguration().getRegisteredQueryName();
-        this.stateStore.readState(this.registeredQueryName);
-        this.windowRange = QueryConfiguration.getQueryConfiguration().getWindow_time_range();
-
+        this.isReady = initParams();
+        if (this.isReady) {
+//            this.currentAgent = new CurrentAgent();
+            this.stateStore = new PubSubRedisStateStore(new CurrentAgent());
+            this.stateStore.readState(this.registeredQueryName);
+        }
     }
+
+    private boolean initParams(){
+        SeraphPayloadHandler payloadHandler = new SeraphPayloadHandler();
+        SeraphPayload payload = payloadHandler.readPayloadFromKafka();
+        if (payload!=null){
+            this.registeredQueryName = payload.getQuery_id();
+            this.emit_time_range = payload.getEmit_time_range();
+            this.timestamp_to_sync = payload.getTimestamp_to_sync();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isReady() { return this.isReady; }
 
     /**
      * Starting from creation records in CDC format it produces deletion records with a customized timestamp.
@@ -38,7 +54,9 @@ public final class DeleteStreamProducer {
 //        System.err.println("KKK_DelStreamProd:  " + this.currentAgent.getAgentName() + "  " + this.currentAgent.getStatus());
 //        this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "started", System.currentTimeMillis());
 //        System.err.println("KKK_DelStreamProd_2: " + this.currentAgent.getAgentName() + "  " + this.currentAgent.getStatus());
-        this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started"));
+
+        this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started", this.timestamp_to_sync));
+
 
         JsonSerializer<Neo4jObj> neoJsonSerializer = new JsonSerializer<>();
         JsonDeserializer<Neo4jObj> neoJsonDeserializer = new JsonDeserializer<>(
@@ -52,11 +70,10 @@ public final class DeleteStreamProducer {
         Serde<OutputObj> outputObjSerde = Serdes.serdeFrom(outputSer,
                 outputDeser);
         final Serde<String> stringSerde = Serdes.String();
-//        long window_range = queryConfiguration.getWindow_time_range();
 
 
 
-       KStream<String,OutputObj> stream = builder.stream("relationships", Consumed.with(Serdes.String(), neoSerde).withTimestampExtractor(new CustomerExtractor(this.windowRange)))
+       KStream<String,OutputObj> stream = builder.stream("relationships", Consumed.with(Serdes.String(), neoSerde).withTimestampExtractor(new CustomerExtractor(this.emit_time_range)))
                 .filter((_key, neo4jObj) -> neo4jObj!=null)
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload()!=null)
                 .filter((_key, neo4jObj) -> neo4jObj.getMeta().get("operation").equals("created"))

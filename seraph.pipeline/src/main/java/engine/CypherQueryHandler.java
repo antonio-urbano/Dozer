@@ -16,25 +16,41 @@ import java.util.List;
 
 public class CypherQueryHandler extends Thread implements AutoCloseable{
 
-    private final Driver driver;
-    private final String cypherQuery;
-    private final String kafkaTopic;
-    private final String registeredQueryName;
-    private final PubSubRedisStateStore stateStore;
-    private final CurrentAgent currentAgent;
+    private Driver driver;
+    private String cypherQuery;
+    private String kafkaTopic;
+    private String registeredQueryName;
+    private Long timestamp_to_sync;
+    private PubSubRedisStateStore stateStore;
+    private CurrentAgent currentAgent;
+    private final boolean isReady;
 
     public CypherQueryHandler(String uri, String user, String password)
     {
-        QueryConfiguration qc = QueryConfiguration.getQueryConfiguration();
-        this.driver = GraphDatabase.driver( uri, AuthTokens.basic( user, password ) );
-        this.cypherQuery = qc.getCypherQuery();
-        this.kafkaTopic = qc.getOutput_topic();
-        this.currentAgent = new CurrentAgent();
-        this.registeredQueryName = qc.getRegisteredQueryName();
-        this.stateStore = new PubSubRedisStateStore(this.currentAgent);
-        this.stateStore.readState(this.registeredQueryName);
+        this.isReady = initParams();
+        if (this.isReady) {
+//            QueryConfiguration qc = QueryConfiguration.getQueryConfiguration();
+            this.driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password));
+            this.currentAgent = new CurrentAgent();
+            this.stateStore = new PubSubRedisStateStore(this.currentAgent);
+            this.stateStore.readState(this.registeredQueryName);
+        }
     }
 
+    private boolean initParams(){
+        SeraphPayloadHandler payloadHandler = new SeraphPayloadHandler();
+        SeraphPayload payload = payloadHandler.readPayloadFromKafka();
+        if (payload!=null){
+            this.registeredQueryName = payload.getQuery_id();
+            this.kafkaTopic = payload.getOutput_stream_topic();
+            this.cypherQuery = payload.getCypher_query();
+            this.timestamp_to_sync = payload.getTimestamp_to_sync();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isReady() { return isReady; }
 
     /**
      * Establish the connection with the neo4j instance and run the cypher query
@@ -157,12 +173,13 @@ public class CypherQueryHandler extends Thread implements AutoCloseable{
 
     // TODO javadoc
     public void run(){
+        System.err.println("KKKK: " + this.currentAgent.getAgentName());
         while (true){
             if(this.currentAgent.getAgentName().equals(DelayedConsumer.class.getSimpleName()) && this.currentAgent.getStatus().equals("completed")){
-                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started"));
+                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "started", this.timestamp_to_sync));
                 System.err.println("YYY_CypherHandler:  " + "CypherHandler started");
                 //blocco lavoro
-                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "completed"));
+                this.stateStore.writeState(this.registeredQueryName, new CurrentAgent(this.getClass().getSimpleName(), "completed", this.timestamp_to_sync));
                 System.err.println("YYY_CypherHandler:  " + "CypherHandler completed");
             }
         }
