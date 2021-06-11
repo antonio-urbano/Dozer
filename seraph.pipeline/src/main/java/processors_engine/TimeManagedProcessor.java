@@ -11,11 +11,11 @@ import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.time.Duration;
 
-public class TimeManagedProcessor implements Processor<String, String> {
+public class TimeManagedProcessor implements Processor<String, CurrentAgent> {
 
     private ProcessorContext context;
-    private KeyValueStore<String, String> kvStore;
-    private KeyValueStore<String, String> offsetKvStore;
+    private KeyValueStore<String, CurrentAgent> kvStore;
+    private KeyValueStore<String, Long> offsetKvStore;
 
 
     @Override
@@ -45,19 +45,17 @@ public class TimeManagedProcessor implements Processor<String, String> {
     }
 
     @Override
-    public void process(String key, String timestampToSync) {
+    public void process(String key, CurrentAgent currentAgent) {
 //        if(currentAgent.getAgentName().equals(TickerProcessor.class.getSimpleName())) {
-            String offsetToRead = this.offsetKvStore.get("value");
-            if (offsetToRead==null)
-                offsetToRead="0";
-            System.err.println("XXX: " + offsetToRead + "   " + timestampToSync);
-            Long l = TimeManagedConsumer_2.delayedStream_seek
+            Long offsetToRead = this.offsetKvStore.get("value");
+            System.err.println("XXX: " + offsetToRead + "   " + currentAgent.getTimestamp_to_sync());
+            offsetToRead = TimeManagedConsumer_2.delayedStream_seek
                     (new TopicPartition("tmpDeleteTopic", 0),
-                            "DelayedDelete11", Long.parseLong(timestampToSync), Long.parseLong(offsetToRead));
-            this.offsetKvStore.put("value", l.toString());
+                            "DelayedDelete1", currentAgent.getTimestamp_to_sync(), offsetToRead);
+            this.offsetKvStore.put("value", offsetToRead);
 
-            this.kvStore.put("key", timestampToSync);
-            context.forward("key",timestampToSync);
+            this.kvStore.put("key", new CurrentAgent(this.getClass().getSimpleName(),"completed", currentAgent.getTimestamp_to_sync()));
+            context.forward("key",currentAgent.getTimestamp_to_sync());
             context.commit();
 //        }
     }

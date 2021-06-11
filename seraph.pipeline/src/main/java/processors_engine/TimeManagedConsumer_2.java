@@ -25,8 +25,6 @@ public class TimeManagedConsumer_2 {
 
         Producer<String, Neo4jObj> producer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
 
-        boolean seek_flag = true;
-
         if(offset_to_read==null)
             offset_to_read=consumer.beginningOffsets(Collections.singletonList(topicPartition)).get(topicPartition);
 

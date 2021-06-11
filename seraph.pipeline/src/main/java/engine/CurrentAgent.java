@@ -2,6 +2,9 @@ package engine;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +20,7 @@ import java.util.Map;
  * </p>
  */
 
-public class CurrentAgent {
+public class CurrentAgent implements Serializable {
 
     private String agentName;
     private String status;
@@ -28,8 +31,10 @@ public class CurrentAgent {
     @JsonCreator
     public CurrentAgent(){}
 
-    @JsonIgnore
-    public CurrentAgent(String agent, String status, Long timestamp_to_sync){
+    @JsonCreator
+    public CurrentAgent(@JsonProperty("agentName") String agent,
+                        @JsonProperty("status") String status,
+                        @JsonProperty("timestamp_to_sync") Long timestamp_to_sync){
         this.agentName = agent;
         this.status = status;
         this.timestamp_to_sync = timestamp_to_sync;

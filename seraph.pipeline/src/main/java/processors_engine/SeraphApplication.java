@@ -17,6 +17,7 @@ import java.util.concurrent.CountDownLatch;
 public class SeraphApplication {
 
     public static void main(final String[] args) {
+
         final Properties props = new Properties();
 
         JsonSerializer<CurrentAgent> agentJsonSerializer = new JsonSerializer<>();
@@ -30,8 +31,8 @@ public class SeraphApplication {
         props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "streams-seraph-processors");
         props.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.putIfAbsent(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
-        props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, CurrentAgentSerde.class);
 
 
         // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
@@ -39,7 +40,7 @@ public class SeraphApplication {
 
         final Topology builder = new Topology();
 
-        builder.addSource("Source", "processor-topic15");
+        builder.addSource("Source", "processor-topic4");
 
         builder.addProcessor("TickerProcessor", TickerProcessor::new, "Source");
         builder.addProcessor("TimeManagedProcessor", TimeManagedProcessor::new, "Source");
@@ -47,23 +48,23 @@ public class SeraphApplication {
         builder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("agent-store-ticker"),
                 Serdes.String(),
-                Serdes.String()),
+                agentSerde),
                 "TickerProcessor");
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("agent-store-time-managed"),
                 Serdes.String(),
-                Serdes.String()),
+               agentSerde),
                 "TimeManagedProcessor");
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("offset-store"),
                 Serdes.String(),
-                Serdes.String()),
+                longSerde),
                 "TimeManagedProcessor");
 
 
-        builder.addSink("Sink", "processor-topic15","TickerProcessor", "TimeManagedProcessor");
+        builder.addSink("Sink", "processor-topic4","TickerProcessor", "TimeManagedProcessor");
 
         final KafkaStreams streams = new KafkaStreams(builder, props);
         final CountDownLatch latch = new CountDownLatch(1);

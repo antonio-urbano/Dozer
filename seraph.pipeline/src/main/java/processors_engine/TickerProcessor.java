@@ -6,9 +6,9 @@ import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 
-public class TickerProcessor implements Processor<String, String> {
+public class TickerProcessor implements Processor<String, CurrentAgent> {
     private ProcessorContext context;
-    private KeyValueStore<String, String> kvStore;
+    private KeyValueStore<String, CurrentAgent> kvStore;
 
 
 
@@ -23,10 +23,9 @@ public class TickerProcessor implements Processor<String, String> {
     }
 
     @Override
-    public void process(String key, String s) {
+    public void process(String key, CurrentAgent currentAgent) {
         System.err.println("XXXXXXXX");
-        Long l = System.currentTimeMillis()+60000L;
-        this.context.forward("key",l.toString());
+        this.context.forward("key",new CurrentAgent(this.getClass().getSimpleName(),"ready", System.currentTimeMillis()+60000L));
         this.context.commit();
 
     }
