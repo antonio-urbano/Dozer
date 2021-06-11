@@ -40,7 +40,7 @@ public class SeraphApplication {
 
         final Topology builder = new Topology();
 
-        builder.addSource("Source", "processor-topic4");
+        builder.addSource("Source", "processor-topic1");
 
         builder.addProcessor("TickerProcessor", TickerProcessor::new, "Source");
         builder.addProcessor("TimeManagedProcessor", TimeManagedProcessor::new, "Source");
@@ -64,14 +64,11 @@ public class SeraphApplication {
                 "TimeManagedProcessor");
 
 
-        builder.addSink("Sink", "processor-topic4","TickerProcessor", "TimeManagedProcessor");
+        builder.addSink("Sink", "processor-topic1","TickerProcessor", "TimeManagedProcessor");
 
         final KafkaStreams streams = new KafkaStreams(builder, props);
         final CountDownLatch latch = new CountDownLatch(1);
 
-        System.out.println("----------------------------");
-        System.out.println(builder.describe());
-        System.out.println("----------------------------");
 
 
         // attach shutdown handler to catch control-c
