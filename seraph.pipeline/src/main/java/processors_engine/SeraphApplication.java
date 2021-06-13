@@ -44,6 +44,7 @@ public class SeraphApplication {
 
         builder.addProcessor("TickerProcessor", TickerProcessor::new, "Source");
         builder.addProcessor("TimeManagedProcessor", TimeManagedProcessor::new, "Source");
+        builder.addProcessor("CypherHandlerProcessor", CypherHandlerProcessor::new, "Source");
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("agent-store-ticker"),
@@ -58,13 +59,19 @@ public class SeraphApplication {
                 "TimeManagedProcessor");
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
+                Stores.inMemoryKeyValueStore("agent-store-cypher-handler"),
+                Serdes.String(),
+                agentSerde),
+                "CypherHandlerProcessor");
+
+        builder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("offset-store"),
                 Serdes.String(),
                 longSerde),
                 "TimeManagedProcessor");
 
 
-        builder.addSink("Sink", "processor-topic1","TickerProcessor", "TimeManagedProcessor");
+        builder.addSink("Sink", "processor-topic1","TickerProcessor", "TimeManagedProcessor", "CypherHandlerProcessor");
 
         final KafkaStreams streams = new KafkaStreams(builder, props);
         final CountDownLatch latch = new CountDownLatch(1);

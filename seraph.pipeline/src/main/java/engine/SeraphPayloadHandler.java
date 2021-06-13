@@ -21,7 +21,8 @@ public class SeraphPayloadHandler {
     final static String REGISTERED_QUERIES_TOPIC="registered-queries-topic19";
 
 
-    private Long getInitTimeToSync() {
+    //todo handle read first record when neo4j is not populated
+    public static Long getInitTimeToSync() {
         ConsumerRecord<String, ?> relationshipRecord =consumeFirstRecord(Neo4jObj.class,new TopicPartition("relationships", 0));
         if (relationshipRecord!=null)
             return relationshipRecord.timestamp();
@@ -46,7 +47,7 @@ public class SeraphPayloadHandler {
 
     }
 
-    private ConsumerRecord<String, ?> consumeFirstRecord(Class<?> classToConsume, TopicPartition topicPartitionToConsume){
+    private static ConsumerRecord<String, ?> consumeFirstRecord(Class<?> classToConsume, TopicPartition topicPartitionToConsume){
         ConsumerFactory<String, ?> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(classToConsume));
         Consumer<String, ?> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartitionToConsume));

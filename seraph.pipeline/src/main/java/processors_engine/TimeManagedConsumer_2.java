@@ -39,7 +39,8 @@ public class TimeManagedConsumer_2 {
                         offset_to_read = r.offset() + 1;
                     } return offset_to_read;
                 }
-            } else if(timestampToSync < System.currentTimeMillis())     //todo handle case
+            }
+            else if(timestampToSync < System.currentTimeMillis())     //todo handle case
                 return offset_to_read;
         }
 
