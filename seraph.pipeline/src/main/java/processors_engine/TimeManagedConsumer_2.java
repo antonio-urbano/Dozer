@@ -11,9 +11,9 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-
 import java.time.Duration;
 import java.util.Collections;
+
 
 public class TimeManagedConsumer_2 {
 
@@ -34,10 +34,13 @@ public class TimeManagedConsumer_2 {
             ConsumerRecords<String, Neo4jObj> records = consumer.poll(Duration.ofMillis(100));
             if (!records.isEmpty()) {
                 for (ConsumerRecord<String, Neo4jObj> r : records.records(topicPartition)) {
+//                    String s = "R.Timestamp: " + new Date(r.timestamp()) + "  TimeToSync: " + new Date(timestampToSync);
+//                    System.err.println("XXXXXXX: " + s);
                     if (r.timestamp() < timestampToSync) {
                         producer.send(new ProducerRecord<>(outputTopic, r.key(), r.value()));
                         offset_to_read = r.offset() + 1;
-                    } return offset_to_read;
+                    }
+                    else return offset_to_read;
                 }
             }
             else if(timestampToSync < System.currentTimeMillis())     //todo handle case

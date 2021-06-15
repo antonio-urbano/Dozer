@@ -1,9 +1,6 @@
 package processors_engine;
 
 import engine.CurrentAgent;
-import engine.CypherQueryHandler;
-import engine.SeraphPayloadHandler;
-import engine.SeraphQueryParser;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
@@ -23,7 +20,7 @@ public class CypherHandlerProcessor implements Processor<String, CurrentAgent> {
 
     @Override
     public void process(String key, CurrentAgent currentAgent) {
-        if(currentAgent.getAgentName().equals(TimeManagedProcessor.class.getSimpleName())) {
+        if(currentAgent.getAgentName().equals(TimeManagedProcessorInsertion.class.getSimpleName())) {
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", (currentAgent.getTimestamp_to_sync()));
             CypherQueryHandler_2 cypherHandler = new CypherQueryHandler_2("bolt://localhost:7687", "neo4j", "sink");

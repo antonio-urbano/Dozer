@@ -40,10 +40,11 @@ public class SeraphApplication {
 
         final Topology builder = new Topology();
 
-        builder.addSource("Source", "processor-topic1");
+        builder.addSource("Source", "processor-topic7");
 
         builder.addProcessor("TickerProcessor", TickerProcessor::new, "Source");
-        builder.addProcessor("TimeManagedProcessor", TimeManagedProcessor::new, "Source");
+        builder.addProcessor("TimeManagedProcessorDeletion", TimeManagedProcessorDeletion::new, "Source");
+        builder.addProcessor("TimeManagedProcessorInsertion", TimeManagedProcessorInsertion::new, "Source");
         builder.addProcessor("CypherHandlerProcessor", CypherHandlerProcessor::new, "Source");
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
@@ -53,10 +54,16 @@ public class SeraphApplication {
                 "TickerProcessor");
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
-                Stores.inMemoryKeyValueStore("agent-store-time-managed"),
+                Stores.inMemoryKeyValueStore("agent-store-time-managed-deletion"),
                 Serdes.String(),
                agentSerde),
-                "TimeManagedProcessor");
+                "TimeManagedProcessorDeletion");
+
+        builder.addStateStore(Stores.keyValueStoreBuilder(
+                Stores.inMemoryKeyValueStore("agent-store-time-managed-insertion"),
+                Serdes.String(),
+                agentSerde),
+                "TimeManagedProcessorInsertion");
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("agent-store-cypher-handler"),
@@ -65,13 +72,19 @@ public class SeraphApplication {
                 "CypherHandlerProcessor");
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
-                Stores.inMemoryKeyValueStore("offset-store"),
+                Stores.inMemoryKeyValueStore("offset-store-deletion"),
                 Serdes.String(),
                 longSerde),
-                "TimeManagedProcessor");
+                "TimeManagedProcessorDeletion");
+
+        builder.addStateStore(Stores.keyValueStoreBuilder(
+                Stores.inMemoryKeyValueStore("offset-store-insertion"),
+                Serdes.String(),
+                longSerde),
+                "TimeManagedProcessorInsertion");
 
 
-        builder.addSink("Sink", "processor-topic1","TickerProcessor", "TimeManagedProcessor", "CypherHandlerProcessor");
+        builder.addSink("Sink", "processor-topic7","TickerProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
         final KafkaStreams streams = new KafkaStreams(builder, props);
         final CountDownLatch latch = new CountDownLatch(1);
