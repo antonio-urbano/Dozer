@@ -1,4 +1,4 @@
-package processors_engine;
+package processors;
 
 import engine.CurrentAgent;
 import engine.JsonDeserializer;

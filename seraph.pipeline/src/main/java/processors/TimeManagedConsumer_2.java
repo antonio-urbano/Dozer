@@ -1,4 +1,4 @@
-package processors_engine;
+package processors;
 
 import config.KafkaConfigProperties;
 import engine.Neo4jObj;

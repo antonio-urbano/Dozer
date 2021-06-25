@@ -1,4 +1,4 @@
-package processors_engine;
+package processors;
 
 import engine.CurrentAgent;
 import engine.JsonDeserializer;
@@ -40,7 +40,7 @@ public class SeraphApplication {
 
         final Topology builder = new Topology();
 
-        builder.addSource("Source", "processor-topic7");
+        builder.addSource("Source", "processor-topic1");
 
         builder.addProcessor("TickerProcessor", TickerProcessor::new, "Source");
         builder.addProcessor("TimeManagedProcessorDeletion", TimeManagedProcessorDeletion::new, "Source");
@@ -84,7 +84,7 @@ public class SeraphApplication {
                 "TimeManagedProcessorInsertion");
 
 
-        builder.addSink("Sink", "processor-topic7","TickerProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
+        builder.addSink("Sink", "processor-topic1","TickerProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
         final KafkaStreams streams = new KafkaStreams(builder, props);
         final CountDownLatch latch = new CountDownLatch(1);

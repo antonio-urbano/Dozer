@@ -1,8 +1,6 @@
-package processors_engine;
+package processors;
 
 import engine.CurrentAgent;
-import engine.CypherQueryHandler;
-import engine.SeraphPayloadHandler;
 import engine.SeraphQueryParser;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;

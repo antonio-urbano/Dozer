@@ -1,4 +1,4 @@
-package processors_engine;
+package processors;
 
 import engine.CurrentAgent;
 import org.apache.kafka.streams.processor.Processor;

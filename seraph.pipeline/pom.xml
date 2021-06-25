@@ -34,13 +34,40 @@
 
     <build>
         <plugins>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>
+                                processors.AAA
+                            </mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>9</source>
-                    <target>9</target>
+                    <source>8</source>     <!-- todo -->
+                    <target>8</target>     <!-- todo -->
                 </configuration>
             </plugin>
 
@@ -164,17 +191,17 @@
             <version>2.7.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>seraph.pipeline</groupId>
-            <artifactId>seraph.pipeline</artifactId>
-            <version>0.1</version>
-        </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/org.apache.rya/rya.streams.kafka -->
         <dependency>
             <groupId>org.apache.rya</groupId>
             <artifactId>rya.streams.kafka</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>jdk.tools</groupId>
+                    <artifactId>jdk.tools</artifactId>
+                </exclusion>
+            </exclusions>
             <version>4.0.1</version>
         </dependency>
 

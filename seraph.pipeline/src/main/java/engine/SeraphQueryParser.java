@@ -1,13 +1,21 @@
 package engine;
 
+import config.KafkaConfigProperties;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
 import seraphGrammar.SeraphLexer;
 import seraphGrammar.SeraphParser;
 import stateStore.PubSubRedisStateStore;
+
+import static engine.SeraphPayloadHandler.REGISTERED_QUERIES_TOPIC;
 
 
 public class SeraphQueryParser {
@@ -50,14 +58,13 @@ public class SeraphQueryParser {
         ParseTreeWalker walker = new ParseTreeWalker();
         QueryConfigListener queryConfigListener = new QueryConfigListener(parser, this.seraphPayload);
         walker.walk(queryConfigListener, tree);
-//        this.currentAgent.updateCurrentAgent(this.getClass().getSimpleName(), "completed", System.currentTimeMillis());
-//        System.err.println("QQQ: " + this.currentAgent.getAgentName() + "  " +this.currentAgent.getPayload().get("input_stream_topic") + "  " +this.currentAgent.getPayload().toString());
-//        this.stateStore.writeState((String) this.currentAgent.getPayload().get("query_id"), this.currentAgent);
-//        this.stateStore.writeState("global_state_store", this.currentAgent);
 
-//        System.out.println(this.seraphPayload);
-        SeraphPayloadHandler payloadHandler = new SeraphPayloadHandler();
-        payloadHandler.writePayloadIntoKafka(this.seraphPayload);
+        Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
+        kafkaProducer.send(new ProducerRecord<>("processor-topic1",
+                new CurrentAgent(this.getClass().getSimpleName(),"completed", 1624455900000L)));
+        kafkaProducer.flush();
+
+
 //        return true;
     }
 }
