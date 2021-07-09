@@ -34,7 +34,6 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
@@ -60,17 +59,15 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>8</source>     <!-- todo -->
-                    <target>8</target>     <!-- todo -->
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
@@ -84,64 +81,6 @@
                 </executions>
             </plugin>
         </plugins>
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                        <compilerId>jdt</compilerId>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.eclipse.tycho</groupId>
-                            <artifactId>tycho-compiler-jdt</artifactId>
-                            <version>0.21.0</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.apache.maven.plugins</groupId>
-                                        <artifactId>maven-assembly-plugin</artifactId>
-                                        <versionRange>[2.4,)</versionRange>
-                                        <goals>
-                                            <goal>single</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore/>
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.apache.maven.plugins</groupId>
-                                        <artifactId>maven-compiler-plugin</artifactId>
-                                        <versionRange>[3.1,)</versionRange>
-                                        <goals>
-                                            <goal>testCompile</goal>
-                                            <goal>compile</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore/>
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 
     <dependencies>
@@ -160,14 +99,11 @@
             <artifactId>neo4j-java-driver-spring-boot-starter</artifactId>
             <version>4.2.4.0</version>
         </dependency>
-        <!-- tag::bolt-dependency[] -->
         <dependency>
             <groupId>org.neo4j.driver</groupId>
             <artifactId>neo4j-java-driver</artifactId>
             <version>4.2.5</version>
         </dependency>
-        <!-- end::bolt-dependency[] -->
-
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
@@ -178,8 +114,6 @@
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
         </dependency>
-
-        <!-- Apache Kafka dependencies -->
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams</artifactId>
@@ -190,9 +124,6 @@
             <artifactId>spring-kafka</artifactId>
             <version>2.7.1</version>
         </dependency>
-
-
-        <!-- https://mvnrepository.com/artifact/org.apache.rya/rya.streams.kafka -->
         <dependency>
             <groupId>org.apache.rya</groupId>
             <artifactId>rya.streams.kafka</artifactId>
@@ -204,15 +135,11 @@
             </exclusions>
             <version>4.0.1</version>
         </dependency>
-
-
-        <!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
             <version>3.15.5</version>
         </dependency>
-
     </dependencies>
 </project>
 
