@@ -26,7 +26,7 @@ public class ProvaProcessor implements Processor<String, Neo4jObj> {
     public void init(ProcessorContext processorContext) {
         this.context = processorContext;
 //        this.kvStore = (KeyValueStore) context.getStateStore("obj-stream-store");
-        this.msgQueueStore = (KeyValueStore) this.context.getStateStore("queue-event-store2");
+        this.msgQueueStore = (KeyValueStore) this.context.getStateStore("queue-event-store");
         this.queueProva = this.msgQueueStore.get("key"); //todo key
         if (this.queueProva==null)
             this.queueProva = new LinkedList<>();

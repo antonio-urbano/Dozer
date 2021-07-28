@@ -132,7 +132,7 @@ public class SeraphApplication {
         topology.addSource("RelationshipsSource", "relationships");
         topology.addProcessor("provaProcessor", ProvaProcessor::new, "RelationshipsSource");
         topology.addStateStore(Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore("queue-event-store2"),
+                Stores.inMemoryKeyValueStore("queue-event-store"),
                 Serdes.String(),
                 queueSerde),
                 "provaProcessor");
