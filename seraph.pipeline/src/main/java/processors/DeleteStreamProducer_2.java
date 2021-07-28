@@ -1,5 +1,6 @@
 package processors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import config.KafkaConfigProperties;
 import engine.*;
 import org.apache.kafka.common.serialization.Serde;
@@ -10,8 +11,14 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.state.StoreBuilder;
+import org.apache.kafka.streams.state.Stores;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.kafka.support.serializer.JsonSerde;
 
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
@@ -33,6 +40,12 @@ public final class DeleteStreamProducer_2 {
         Serde<OutputObj> outputObjSerde = Serdes.serdeFrom(outputSer,
                 outputDeser);
 
+        JsonSerializer<OutputObj[]> outputObjArraySerializer = new JsonSerializer<>();
+        JsonDeserializer<OutputObj[]> outputObjArrayDeserializer = new JsonDeserializer<>(
+                OutputObj[].class);
+        Serde<OutputObj[]> outputArrayObjSerde = Serdes.serdeFrom(outputObjArraySerializer,
+                outputObjArrayDeserializer);
+
 
         final Serde<String> stringSerde = Serdes.String();
 
@@ -47,6 +60,15 @@ public final class DeleteStreamProducer_2 {
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload().get("start")!=null)
                 .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj)));
 
+/*
+        // create store
+        StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore("queue-store"),
+                Serdes.String(),
+                outputArrayObjSerde);
+        builder.addStateStore(storeBuilder);
+        stream.process(DeleteProducerByEvent::new,"queue-store");
+*/
 
         stream.to("tmpDeleteTopic", Produced.with(stringSerde, outputObjSerde));
 

@@ -29,15 +29,16 @@ public class OutputObj implements Serializable {
      */
     @JsonCreator
     public OutputObj(@JsonProperty("neo4jObj") Neo4jObj neo4jObj){
-        this.neo4jObj = neo4jObj;
-        this.meta = this.neo4jObj.getMeta();
-        this.payload = this.neo4jObj.getPayload();
-        this.schema = this.neo4jObj.getSchema();
-        this.setBefore((Map) this.neo4jObj.getPayload().get("after"));
-        this.setAfter(null);
-        this.meta.put("operation", "deleted");
-        this.meta.computeIfPresent("timestamp", (k,v)-> ((long)v)+60000); // todo change with window value
-
+        if (neo4jObj!=null) {
+            this.neo4jObj = neo4jObj;
+            this.meta = this.neo4jObj.getMeta();
+            this.payload = this.neo4jObj.getPayload();
+            this.schema = this.neo4jObj.getSchema();
+            this.setBefore((Map) this.neo4jObj.getPayload().get("after"));
+            this.setAfter(null);
+            this.meta.put("operation", "deleted");
+            this.meta.computeIfPresent("timestamp", (k, v) -> ((long) v) + 60000); // todo change with window value
+        }
     }
 
     public Map getMeta() { return this.meta; }
