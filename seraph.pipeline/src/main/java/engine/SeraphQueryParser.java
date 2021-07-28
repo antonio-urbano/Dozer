@@ -62,7 +62,7 @@ public class SeraphQueryParser {
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
         kafkaProducer.send(new ProducerRecord<>("processor-topic1",
                 new CurrentAgent(this.getClass().getSimpleName(),
-                        "completed", 1627479600000L)));//(SeraphPayloadHandler.getInitTimeToSync()));
+                        "completed", 1627488600000L)));//(SeraphPayloadHandler.getInitTimeToSync()));
         kafkaProducer.flush();
 
 

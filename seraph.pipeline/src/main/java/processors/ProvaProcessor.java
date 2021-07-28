@@ -18,44 +18,37 @@ public class ProvaProcessor implements Processor<String, Neo4jObj> {
 
     private ProcessorContext context;
     private final int QUEUE_SIZE = 3;
-//    private KeyValueStore<String, Queue<Neo4jObj>> msgQueueStore;
-    private Queue<OutputObj> queueProva;
-    Producer<String, OutputObj> kafkaProducer;
+    private KeyValueStore<String, Queue<Object>> msgQueueStore;
+    private Queue<Object> queueProva;
+    Producer<String, Object> kafkaProducer;
 
     @Override
     public void init(ProcessorContext processorContext) {
-        this.context = context;
+        this.context = processorContext;
 //        this.kvStore = (KeyValueStore) context.getStateStore("obj-stream-store");
-//        this.msgQueueStore = (KeyValueStore) this.context.getStateStore("queue-store3");
-        queueProva = new LinkedList<>();
+        this.msgQueueStore = (KeyValueStore) this.context.getStateStore("queue-event-store2");
+        this.queueProva = this.msgQueueStore.get("key"); //todo key
+        if (this.queueProva==null)
+            this.queueProva = new LinkedList<>();
         this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
     }
 
     @Override
     public void process(String s, Neo4jObj neo4jObj) {
-
-        /*
-                KStream<String,OutputObj> stream = builder.stream("relationships",
-                Consumed.with(Serdes.String(), neoSerde).
-                        withTimestampExtractor(new CustomerExtractor(0L))) //todo window range
-                .filter((_key, neo4jObj) -> neo4jObj!=null)
-                .filter((_key, neo4jObj) -> neo4jObj.getPayload()!=null)
-                .filter((_key, neo4jObj) -> neo4jObj.getMeta().get("operation").equals("created"))
-                .filter((_key, neo4jObj) -> neo4jObj.getPayload().get("start")!=null)
-                .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj)));
-         */
-        System.err.println("KKKKKKKKKKKK"+queueProva.size());
         OutputObj outputObj=null;
         if (neo4jObj!=null && neo4jObj.getPayload()!=null
                 && neo4jObj.getMeta().get("operation").equals("created")
                 && neo4jObj.getPayload().get("start")!=null)
-            outputObj = new OutputObj(neo4jObj);
+            outputObj = new OutputObj(neo4jObj, 0L);
         if (outputObj!=null)
             queueProva.add(outputObj);
+
         if(queueProva.size()>QUEUE_SIZE){
             kafkaProducer.send(new ProducerRecord<>("tmpDeleteEventTopic", queueProva.remove()));
             kafkaProducer.flush();
         }
+        this.msgQueueStore.put("key", queueProva);
+        this.context.commit();
     }
 
     @Override

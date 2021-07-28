@@ -32,10 +32,24 @@ public class SeraphApplication {
         return props;
     }
 
-    static Properties getStreamDeleteProperties(){
+    static Properties getStreamDeleteByEventProperties(){
         Properties props = new Properties();
 
-        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "dozer-delete-stream-app");
+        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "dozer-delete-stream-event-app");
+        props.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.putIfAbsent(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
+        props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Neo4jObjSerde.class);
+        // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
+        props.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        return props;
+    }
+
+    static Properties getStreamDeleteByTimeProperties(){
+        Properties props = new Properties();
+
+        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "dozer-delete-stream-time-app");
         props.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.putIfAbsent(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
         // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
@@ -44,7 +58,7 @@ public class SeraphApplication {
         return props;
     }
 
-    static void produceDeleteRecord(final StreamsBuilder builder) {
+    static void produceDeleteRecordByTime(final StreamsBuilder builder, Long emit_time_range) {
 
 
         JsonSerializer<Neo4jObj> neoJsonSerializer = new JsonSerializer<>();
@@ -79,12 +93,12 @@ public class SeraphApplication {
 
         KStream<String,OutputObj> stream = builder.stream("relationships",
                 Consumed.with(Serdes.String(), neoSerde).
-                        withTimestampExtractor(new CustomerExtractor(300000L))) //todo window range
+                        withTimestampExtractor(new CustomerExtractor(emit_time_range)))
                 .filter((_key, neo4jObj) -> neo4jObj!=null)
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload()!=null)
                 .filter((_key, neo4jObj) -> neo4jObj.getMeta().get("operation").equals("created"))
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload().get("start")!=null)
-                .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj)));
+                .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj, emit_time_range)));
 
 /*
 //        // create store
@@ -107,7 +121,27 @@ public class SeraphApplication {
 
     }
 
-    public static void main(final String[] args) {
+    static void produceDeleteRecordByEvent(final Topology topology) {
+
+        JsonSerializer<Queue> queueSer = new JsonSerializer<>();
+        JsonDeserializer<Queue> queueDeser = new JsonDeserializer<>(
+                Queue.class);
+        Serde<Queue> queueSerde = Serdes.serdeFrom(queueSer,
+                queueDeser);
+
+        topology.addSource("RelationshipsSource", "relationships");
+        topology.addProcessor("provaProcessor", ProvaProcessor::new, "RelationshipsSource");
+        topology.addStateStore(Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore("queue-event-store2"),
+                Serdes.String(),
+                queueSerde),
+                "provaProcessor");
+
+    }
+
+
+
+        public static void main(final String[] args) {
 
 
 
@@ -126,8 +160,11 @@ public class SeraphApplication {
 //        final Topology builder = streamsBuilder.build();
 //rops
         final Topology builder = new Topology();
+        final Topology deleteByEvent_topology = new Topology();
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
-        produceDeleteRecord(streamsBuilder);
+
+//        produceDeleteRecordByTime(streamsBuilder, 300000L);
+        produceDeleteRecordByEvent(deleteByEvent_topology);
 
 
         builder.addSource("Source", "processor-topic1");
@@ -162,8 +199,9 @@ public class SeraphApplication {
 
 
         final KafkaStreams streams = new KafkaStreams(builder, getProcessorProperties());
+        final KafkaStreams streams_delete_byEvent = new KafkaStreams(deleteByEvent_topology, getStreamDeleteByEventProperties());
 //        final CountDownLatch delete_latch = new CountDownLatch(1);
-        final KafkaStreams streams_delete = new KafkaStreams(streamsBuilder.build(), getStreamDeleteProperties());
+//        final KafkaStreams streams_delete_byTime = new KafkaStreams(streamsBuilder.build(), getStreamDeleteByTimeProperties());
         final CountDownLatch latch = new CountDownLatch(2);
 
 
@@ -174,7 +212,10 @@ public class SeraphApplication {
             @Override
             public void run() {
                 streams.close();
-                streams_delete.close();
+
+//                streams_delete_byTime.close();
+                streams_delete_byEvent.close();
+
                 latch.countDown();
             }
         });
@@ -182,7 +223,7 @@ public class SeraphApplication {
 //        Runtime.getRuntime().addShutdownHook(new Thread("delete-thread-shutdown-hook") {
 //            @Override
 //            public void run() {
-//                streams_delete.close();
+//                streams_delete_byTime.close();
 ////                streams.close();
 //                delete_latch.countDown();
 //            }
@@ -190,7 +231,10 @@ public class SeraphApplication {
 
         try {
             streams.start();
-            streams_delete.start();
+
+//            streams_delete_byTime.start();
+            streams_delete_byEvent.start();
+
             latch.await();
 //            delete_latch.await();
         } catch (final Throwable e) {

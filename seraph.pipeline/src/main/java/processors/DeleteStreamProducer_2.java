@@ -25,7 +25,7 @@ import java.util.concurrent.CountDownLatch;
 
 public final class DeleteStreamProducer_2 {
 
-    static void produceDeleteRecord(final StreamsBuilder builder) {
+    static void produceDeleteRecord(final StreamsBuilder builder, Long emit_time_range) {
 
 
         JsonSerializer<Neo4jObj> neoJsonSerializer = new JsonSerializer<>();
@@ -53,12 +53,12 @@ public final class DeleteStreamProducer_2 {
 
         KStream<String,OutputObj> stream = builder.stream("relationships",
                 Consumed.with(Serdes.String(), neoSerde).
-                        withTimestampExtractor(new CustomerExtractor(300000L))) //todo window range
+                        withTimestampExtractor(new CustomerExtractor(emit_time_range))) //todo window range
                 .filter((_key, neo4jObj) -> neo4jObj!=null)
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload()!=null)
                 .filter((_key, neo4jObj) -> neo4jObj.getMeta().get("operation").equals("created"))
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload().get("start")!=null)
-                .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj)));
+                .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj, emit_time_range)));
 
 /*
         // create store
@@ -83,7 +83,7 @@ public final class DeleteStreamProducer_2 {
         final Properties props = KafkaConfigProperties.getStreamsConfig();
         final StreamsBuilder builder = new StreamsBuilder();
 
-        produceDeleteRecord(builder);
+        produceDeleteRecord(builder, 300000L);
 
 
         final KafkaStreams streams = new KafkaStreams(builder.build(), props);

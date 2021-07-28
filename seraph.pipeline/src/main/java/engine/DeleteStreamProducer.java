@@ -84,7 +84,7 @@ public final class DeleteStreamProducer {
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload()!=null)
                 .filter((_key, neo4jObj) -> neo4jObj.getMeta().get("operation").equals("created"))
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload().get("start")!=null)
-                .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj)));
+                .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj, this.emit_time_range)));
 
         stream.to(tmpDeleteTopicName, Produced.with(stringSerde, outputObjSerde));
 
