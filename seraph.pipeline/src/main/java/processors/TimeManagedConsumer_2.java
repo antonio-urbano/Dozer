@@ -19,11 +19,12 @@ public class TimeManagedConsumer_2 {
 
     static Long delayedStream_seek(TopicPartition topicPartition, String outputTopic, Long timestampToSync, Long offset_to_read) {
 
-        ConsumerFactory<String, Neo4jObj> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(Neo4jObj.class));
-        Consumer<String, Neo4jObj> consumer = cf.createConsumer();
+        //todo differentiate Object: Neo4jObj if insertion, OutputObj if deletion
+        ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(Neo4jObj.class));
+        Consumer<String, Object> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartition));
 
-        Producer<String, Neo4jObj> producer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
+        Producer<String, Object> producer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
 
         if(offset_to_read==null)
             offset_to_read=consumer.beginningOffsets(Collections.singletonList(topicPartition)).get(topicPartition);
@@ -31,9 +32,9 @@ public class TimeManagedConsumer_2 {
 
         consumer.seek(topicPartition, offset_to_read);
         while (true) {
-            ConsumerRecords<String, Neo4jObj> records = consumer.poll(Duration.ofMillis(100));
+            ConsumerRecords<String, Object> records = consumer.poll(Duration.ofMillis(100));
             if (!records.isEmpty()) {
-                for (ConsumerRecord<String, Neo4jObj> r : records.records(topicPartition)) {
+                for (ConsumerRecord<String, Object> r : records.records(topicPartition)) {
 //                    String s = "R.Timestamp: " + new Date(r.timestamp()) + "  TimeToSync: " + new Date(timestampToSync);
 //                    System.err.println("XXXXXXX: " + s);
                     if (r.timestamp() < timestampToSync) {

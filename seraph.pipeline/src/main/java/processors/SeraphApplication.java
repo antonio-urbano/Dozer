@@ -4,12 +4,10 @@ import engine.*;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 
 import java.util.Properties;
@@ -130,7 +128,7 @@ public class SeraphApplication {
                 queueDeser);
 
         topology.addSource("RelationshipsSource", "relationships");
-        topology.addProcessor("provaProcessor", ProvaProcessor::new, "RelationshipsSource");
+        topology.addProcessor("provaProcessor", DeleteProducerByEventProcessor::new, "RelationshipsSource");
         topology.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("queue-event-store"),
                 Serdes.String(),
@@ -170,10 +168,11 @@ public class SeraphApplication {
         builder.addSource("Source", "processor-topic1");
 //        builder.addSource("RelationshipsSource", new StringDeserializer(), new Neo4jObjSerde().deserializer(),"relationships");
 
-//        builder.addProcessor("provaProcessor", ProvaProcessor::new, "RelationshipsSource");
+//        builder.addProcessor("provaProcessor", DeleteProducerByEventProcessor::new, "RelationshipsSource");
 
 
-        builder.addProcessor("TickerProcessorTime", TickerProcessorTime::new, "Source");
+//        builder.addProcessor("TickerProcessorTime", TickerProcessorTime::new, "Source");
+        builder.addProcessor("TickerProcessorEvent", TickerProcessorEvent::new, "Source");
         builder.addProcessor("TimeManagedProcessorDeletion", TimeManagedProcessorDeletion::new, "Source");
         builder.addProcessor("TimeManagedProcessorInsertion", TimeManagedProcessorInsertion::new, "Source");
         builder.addProcessor("CypherHandlerProcessor", CypherHandlerProcessor::new, "Source");
@@ -184,18 +183,18 @@ public class SeraphApplication {
                 Stores.inMemoryKeyValueStore("agent-store2"),
                 Serdes.String(),
                 agentSerde),
-                "TickerProcessorTime", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
+                "TickerProcessorEvent", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("offset-store2"),
                 Serdes.String(),
                 longSerde),
-                "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion");
+                "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "TickerProcessorEvent");
 
 
 
-        builder.addSink("Sink", "processor-topic1","TickerProcessorTime", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
+        builder.addSink("Sink", "processor-topic1","TickerProcessorEvent", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
 
         final KafkaStreams streams = new KafkaStreams(builder, getProcessorProperties());
