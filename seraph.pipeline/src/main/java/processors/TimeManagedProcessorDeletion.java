@@ -88,6 +88,7 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
     private void updateAgentKvStore(String key, CurrentAgent currentAgent) {
 
         if(currentAgent.getAgentName().equals(TickerProcessorEvent.class.getSimpleName())
+                || currentAgent.getAgentName().equals(TickerProcessorTime.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
             Long offsetToRead = TimeManagedConsumer_2.delayedStream_seek
                     (new TopicPartition("tmpDeleteTopic", 0),

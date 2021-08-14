@@ -24,7 +24,6 @@ public class TickerEventInputReader {
         Consumer<String, Neo4jObj> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartition));
 
-        Producer<String, Neo4jObj> producer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
 
         if(offset_to_read==null)
             offset_to_read=consumer.beginningOffsets(Collections.singletonList(topicPartition)).get(topicPartition);
@@ -48,8 +47,6 @@ public class TickerEventInputReader {
                     }
                 }
             }
-//            else if(timestampToSync < System.currentTimeMillis())     //todo handle case
-//                return offset_to_read;
         }
 
     }

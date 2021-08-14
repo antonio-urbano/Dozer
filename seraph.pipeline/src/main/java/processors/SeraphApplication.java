@@ -71,21 +71,6 @@ public class SeraphApplication {
         Serde<OutputObj> outputObjSerde = Serdes.serdeFrom(outputSer,
                 outputDeser);
 
-
-        JsonSerializer<OutputObj[]> outputArraySer = new JsonSerializer<>();
-        JsonDeserializer<OutputObj[]> outputArrayDeser = new JsonDeserializer<>(
-                OutputObj[].class);
-        Serde<OutputObj[]> outputObjArraySerde = Serdes.serdeFrom(outputArraySer,
-                outputArrayDeser);
-
-
-        JsonSerializer<Queue> queueSer = new JsonSerializer<>();
-        JsonDeserializer<Queue> queueDeser = new JsonDeserializer<>(
-                Queue.class);
-        Serde<Queue> queueSerde = Serdes.serdeFrom(queueSer,
-                queueDeser);
-
-
         final Serde<String> stringSerde = Serdes.String();
 
 
@@ -98,24 +83,7 @@ public class SeraphApplication {
                 .filter((_key, neo4jObj) -> neo4jObj.getPayload().get("start")!=null)
                 .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj, emit_time_range)));
 
-/*
-//        // create store
-//        StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
-//                Stores.persistentKeyValueStore("obj-stream-store"),
-//                Serdes.String(),
-//                outputObjArraySerde);
-//        builder.addStateStore(storeBuilder);
-        //
-        StoreBuilder queueStoreBuilder = Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore("queue-store3"),
-                Serdes.String(),
-                queueSerde);
-        builder.addStateStore(queueStoreBuilder);
-        stream.process(DeleteProducerByEvent::new,"queue-store3");//,"obj-stream-store");
-*/
-
         stream.to("tmpDeleteTopic", Produced.with(stringSerde, outputObjSerde));
-
 
     }
 
@@ -128,12 +96,12 @@ public class SeraphApplication {
                 queueDeser);
 
         topology.addSource("RelationshipsSource", "relationships");
-        topology.addProcessor("provaProcessor", DeleteProducerByEventProcessor::new, "RelationshipsSource");
+        topology.addProcessor("DeleteProducerByEventProcessor", DeleteProducerByEventProcessor::new, "RelationshipsSource");
         topology.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("queue-event-store"),
                 Serdes.String(),
                 queueSerde),
-                "provaProcessor");
+                "DeleteProducerByEventProcessor");
 
     }
 
@@ -141,38 +109,28 @@ public class SeraphApplication {
 
         public static void main(final String[] args) {
 
+            JsonSerializer<CurrentAgent> agentJsonSerializer = new JsonSerializer<>();
+            JsonDeserializer<CurrentAgent> agentJsonDeserializer = new JsonDeserializer<>(
+                    CurrentAgent.class);
+            Serde<CurrentAgent> agentSerde = Serdes.serdeFrom(agentJsonSerializer,
+                    agentJsonDeserializer);
+
+            Serde<Long> longSerde = Serdes.Long();
 
 
-        JsonSerializer<CurrentAgent> agentJsonSerializer = new JsonSerializer<>();
-        JsonDeserializer<CurrentAgent> agentJsonDeserializer = new JsonDeserializer<>(
-                CurrentAgent.class);
-        Serde<CurrentAgent> agentSerde = Serdes.serdeFrom(agentJsonSerializer,
-                agentJsonDeserializer);
+            final Topology builder = new Topology();
+            final Topology deleteByEvent_topology = new Topology();
+            final StreamsBuilder builder_deleteRecordByTime = new StreamsBuilder();
 
-        Serde<Long> longSerde = Serdes.Long();
-
-
-
-//        final StreamsBuilder streamsBuilder = new StreamsBuilder();
-//        produceDeleteRecord(streamsBuilder);
-//        final Topology builder = streamsBuilder.build();
-//rops
-        final Topology builder = new Topology();
-        final Topology deleteByEvent_topology = new Topology();
-        final StreamsBuilder streamsBuilder = new StreamsBuilder();
-
-//        produceDeleteRecordByTime(streamsBuilder, 300000L);
+//        produceDeleteRecordByTime(builder_deleteRecordByTime, 300000L);
         produceDeleteRecordByEvent(deleteByEvent_topology);
 
 
         builder.addSource("Source", "processor-topic1");
-//        builder.addSource("RelationshipsSource", new StringDeserializer(), new Neo4jObjSerde().deserializer(),"relationships");
-
-//        builder.addProcessor("provaProcessor", DeleteProducerByEventProcessor::new, "RelationshipsSource");
 
 
-//        builder.addProcessor("TickerProcessorTime", TickerProcessorTime::new, "Source");
-        builder.addProcessor("TickerProcessorEvent", TickerProcessorEvent::new, "Source");
+        builder.addProcessor("TickerProcessorTime", TickerProcessorTime::new, "Source");
+//        builder.addProcessor("TickerProcessorEvent", TickerProcessorEvent::new, "Source");
         builder.addProcessor("TimeManagedProcessorDeletion", TimeManagedProcessorDeletion::new, "Source");
         builder.addProcessor("TimeManagedProcessorInsertion", TimeManagedProcessorInsertion::new, "Source");
         builder.addProcessor("CypherHandlerProcessor", CypherHandlerProcessor::new, "Source");
@@ -183,24 +141,24 @@ public class SeraphApplication {
                 Stores.inMemoryKeyValueStore("agent-store2"),
                 Serdes.String(),
                 agentSerde),
-                "TickerProcessorEvent", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
+                "TickerProcessorTime", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("offset-store2"),
                 Serdes.String(),
                 longSerde),
-                "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "TickerProcessorEvent");
+                "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "TickerProcessorTime");
 
 
 
-        builder.addSink("Sink", "processor-topic1","TickerProcessorEvent", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
+        builder.addSink("Sink", "processor-topic1","TickerProcessorTime", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
 
         final KafkaStreams streams = new KafkaStreams(builder, getProcessorProperties());
         final KafkaStreams streams_delete_byEvent = new KafkaStreams(deleteByEvent_topology, getStreamDeleteByEventProperties());
 //        final CountDownLatch delete_latch = new CountDownLatch(1);
-//        final KafkaStreams streams_delete_byTime = new KafkaStreams(streamsBuilder.build(), getStreamDeleteByTimeProperties());
+//        final KafkaStreams streams_delete_byTime = new KafkaStreams(builder_deleteRecordByTime.build(), getStreamDeleteByTimeProperties());
         final CountDownLatch latch = new CountDownLatch(2);
 
 
