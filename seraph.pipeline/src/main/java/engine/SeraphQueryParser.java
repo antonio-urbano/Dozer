@@ -9,13 +9,8 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.Serde;
-import org.apache.kafka.common.serialization.Serdes;
 import seraphGrammar.SeraphLexer;
 import seraphGrammar.SeraphParser;
-import stateStore.PubSubRedisStateStore;
-
-import static engine.SeraphPayloadHandler.REGISTERED_QUERIES_TOPIC;
 
 
 public class SeraphQueryParser {

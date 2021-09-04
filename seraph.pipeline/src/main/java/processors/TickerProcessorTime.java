@@ -22,72 +22,16 @@ public class TickerProcessorTime implements Processor<String, CurrentAgent> {
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        this.kvStore = (KeyValueStore) context.getStateStore("agent-store2"); //todo name state store
+        this.kvStore = (KeyValueStore) context.getStateStore("agent-store"); //todo name state store
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic1", agent));
+        kafkaProducer.send(new ProducerRecord<>("processor-topic", agent)); //todo topic name
         kafkaProducer.flush();
         kafkaProducer.close();
-        //CurrentAgent agent = this.kvStore.get("key");
-        /*
-        if(agent!=null){
-            if (agent.getAgentName().equals(this.getClass().getSimpleName())) {
-                System.err.println("XXXXXXXX Ticker:  " + agent.getAgentName() + "  " + agent.getTimestamp_to_sync());
-
-                Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-                kafkaProducer.send(new ProducerRecord<>("processor-topic2", agent));
-                kafkaProducer.flush();
-                kafkaProducer.close();
-
-            }
-        }
-         */
-
-
-        /*if(this.context!=null) {
-//            if (agent != null)
-//                updateAgentKvStore("key", agent);
-            this.context.schedule(Duration.ofMillis(windowRange), PunctuationType.WALL_CLOCK_TIME, (timestamp) -> {
-                KeyValueIterator<String, CurrentAgent> iter = this.kvStore.all();
-                KeyValue<String, CurrentAgent> entry = null;
-                while (iter.hasNext()) {
-                    entry = iter.next();
-                }
-                if (entry!=null)
-                    context.forward(entry.key, entry.value);
-                iter.close();
-
-                // commit the current processing progress
-                context.commit();
-            });
-        }*/
-
-        /*if(this.context!=null) {
-            KeyValueIterator<String, CurrentAgent> iter = this.kvStore.all();
-            KeyValue<String, CurrentAgent> entry = null;
-            while (iter.hasNext())
-                entry = iter.next();
-            if (entry!=null && this.context!=null && agent!=null)
-                    this.context.forward(entry.key, entry.value);
-            iter.close();
-
-            // commit the current processing progress
-            this.context.commit();
-        }*/
-//        else System.err.println("KKKKKKKKKK null");
-
-
-//            System.err.println("XXXXXXXX Ticker:  " + agent.getAgentName() + "  " + agent.getTimestamp_to_sync());
-//            updateAgentKvStore("key", agent);
-
-//        if (agent!=null && agent.getAgentName().equals(this.getClass().getSimpleName())){
-//            this.context.forward("key", agent);
-//            this.context.commit();
-//        }
-
     }
 
+    //todo "key"
     private void updateAgentKvStore(String key, CurrentAgent currentAgent) {
         if (currentAgent.getAgentName().equals(SeraphQueryParser.class.getSimpleName())
         && currentAgent.getStatus().equals("completed")){
