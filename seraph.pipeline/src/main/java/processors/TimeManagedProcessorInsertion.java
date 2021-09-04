@@ -2,19 +2,14 @@ package processors;
 
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
-import engine.OutputObj;
+import engine.TimeManagedConsumer_2;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
-import org.apache.kafka.streams.processor.PunctuationType;
-import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
-
-import java.time.Duration;
 
 
 public class TimeManagedProcessorInsertion implements Processor<String, CurrentAgent> {

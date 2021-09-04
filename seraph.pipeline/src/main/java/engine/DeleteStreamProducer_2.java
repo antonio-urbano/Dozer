@@ -1,4 +1,4 @@
-package processors;
+package engine;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import config.KafkaConfigProperties;
@@ -25,6 +25,12 @@ import java.util.concurrent.CountDownLatch;
 
 public final class DeleteStreamProducer_2 {
 
+    /**
+     * Starting from creation records in CDC format it produces deletion records with a customized timestamp.
+     * These record will be consumed by the {@link TimeManagedConsumer} to re-produce the record at proper time
+     * @param builder
+     * @param emit_time_range temporary topic on which produce deletion record with custom timestamp
+     */
     static void produceDeleteRecord(final StreamsBuilder builder, Long emit_time_range) {
 
 

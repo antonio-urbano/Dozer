@@ -1,4 +1,4 @@
-package processors;
+package application;
 
 import engine.*;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -9,12 +9,13 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.state.Stores;
+import processors.*;
 
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 
-public class SeraphApplication {
+public class DozerApplication {
 
     static Properties getProcessorProperties(){
         Properties props = new Properties();

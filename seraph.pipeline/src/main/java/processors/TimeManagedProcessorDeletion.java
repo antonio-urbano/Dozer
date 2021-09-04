@@ -2,6 +2,7 @@ package processors;
 
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
+import engine.TimeManagedConsumer_2;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
