@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * This class is used to (de)serialize the record produced starting from the
+ * This class is used to serialize/deserialize the record produced starting from the
  * {@link Neo4jObj} object.
  */
 @JsonRootName("outputObj")

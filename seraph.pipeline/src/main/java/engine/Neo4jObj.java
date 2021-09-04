@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * This class is used to (de)serialize the record in CDC format
+ * This class is used to serialize/deserialize the record in CDC format
  * {@see https://neo4j.com/labs/kafka/4.0/producer/}
  */
 @JsonRootName("neo4jObj")

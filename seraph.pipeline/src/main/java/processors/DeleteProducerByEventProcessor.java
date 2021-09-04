@@ -24,7 +24,7 @@ public class DeleteProducerByEventProcessor implements Processor<String, Neo4jOb
     @Override
     public void init(ProcessorContext processorContext) {
         this.context = processorContext;
-        this.kvStore = (KeyValueStore) this.context.getStateStore("queue-event-store");
+        this.kvStore = (KeyValueStore) this.context.getStateStore("queue-event-store");     //todo store name
         this.queueProva = this.kvStore.get("key"); //todo key
         if (this.queueProva==null)
             this.queueProva = new LinkedList<>();

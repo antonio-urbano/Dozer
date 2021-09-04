@@ -1,12 +1,13 @@
-package processors;
+package custom_serdes;
 
 import engine.CurrentAgent;
-import engine.JsonDeserializer;
-import engine.JsonSerializer;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 
+/**
+ * Custom Serde for the {@link CurrentAgent}
+ */
 public class CurrentAgentSerde implements Serde<CurrentAgent> {
 
     private final JsonSerializer<CurrentAgent> serializer = new JsonSerializer<>();

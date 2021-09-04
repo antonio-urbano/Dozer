@@ -15,7 +15,7 @@ public class CurrentAgent implements Serializable {
 
     private String agentName;
     private String status;
-    private Long timestamp_to_sync;
+    private Long timestampToSync;
 
 
     @JsonCreator
@@ -24,19 +24,19 @@ public class CurrentAgent implements Serializable {
     /**
      * @param agent     the class name of the component currently performing operations
      * @param status    the status of the current components -- may be "started" or "completed"
-     * @param timestamp_to_sync the last timestamp to which all the components has to synchronize
+     * @param timestampToSync the last timestamp to which all the components has to synchronize
      */
     @JsonCreator
     public CurrentAgent(@JsonProperty("agentName") String agent,
                         @JsonProperty("status") String status,
-                        @JsonProperty("timestamp_to_sync") Long timestamp_to_sync){
+                        @JsonProperty("timestampToSync") Long timestampToSync){
         this.agentName = agent;
         this.status = status;
-        this.timestamp_to_sync = timestamp_to_sync;
+        this.timestampToSync = timestampToSync;
     }
 
     public String getAgentName() { return agentName; }
     public String getStatus() { return status;  }
-    public Long getTimestamp_to_sync() { return timestamp_to_sync; }
+    public Long getTimestampToSync() { return timestampToSync; }
 
 }

@@ -44,7 +44,7 @@
                     <archive>
                         <manifest>
                             <mainClass>
-                                processors.AAA
+                                application.SeraphParserApplication
                             </mainClass>
                         </manifest>
                     </archive>

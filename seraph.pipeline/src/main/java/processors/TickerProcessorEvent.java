@@ -18,7 +18,7 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
     private KeyValueStore<String, CurrentAgent> kvStore;
     private KeyValueStore<String, Long> offsetKvStore;
     private Long[] timestampToSync_offsetToRead;
-    private final Long EVENT_RANGE = 5L;
+    private Long windowEventRange = 5L;        // todo event range value
 
 
 
@@ -26,13 +26,13 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store2");
+        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store");  // todo store name
         this.timestampToSync_offsetToRead = new Long[2];
-        kvStore = (KeyValueStore) context.getStateStore("agent-store2");
+        kvStore = (KeyValueStore) context.getStateStore("agent-store");         // todo store name
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic1", agent));
+        kafkaProducer.send(new ProducerRecord<>("processor-topic", agent));     // todo topic name
         kafkaProducer.flush();
         kafkaProducer.close();
     }
@@ -40,11 +40,11 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
 
     @Override
     public void process(String key, CurrentAgent currentAgent) {
-        //todo handle "key", "value" and topicNames
+        //todo handle "key", "value" and topicNames ("relationships" e "value-ticker-event")
         if (currentAgent.getAgentName().equals(SeraphQueryParser.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", currentAgent.getTimestamp_to_sync());
+                    "completed", currentAgent.getTimestampToSync());
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();
@@ -54,7 +54,7 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
                 && currentAgent.getStatus().equals("completed")){
             this.timestampToSync_offsetToRead = TickerEventInputReader.readCreateEvent
                     (new TopicPartition("relationships", 0),
-                            EVENT_RANGE, this.offsetKvStore.get("value-ticker-event"));
+                            windowEventRange, this.offsetKvStore.get("value-ticker-event"));
 
             Long timestampToSync = this.timestampToSync_offsetToRead[0];
             Long offsetToRead = this.timestampToSync_offsetToRead[1];

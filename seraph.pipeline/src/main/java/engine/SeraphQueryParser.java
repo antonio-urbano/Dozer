@@ -15,15 +15,10 @@ import seraphGrammar.SeraphParser;
 
 public class SeraphQueryParser {
 
-//    private final CurrentAgent currentAgent;
-//    private final PubSubRedisStateStore stateStore;
 
     private final SeraphPayload seraphPayload;
 
     public SeraphQueryParser(){
-//        this.currentAgent=new CurrentAgent(this.getClass().getSimpleName(), "started");
-//        this.stateStore = new PubSubRedisStateStore(this.currentAgent);
-//        this.stateStore.writeState("global_state_store", this.currentAgent);
         this.seraphPayload = new SeraphPayload();
     }
 
@@ -55,12 +50,10 @@ public class SeraphQueryParser {
         walker.walk(queryConfigListener, tree);
 
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic1",
+        kafkaProducer.send(new ProducerRecord<>("processor-topic",      // todo topic name
                 new CurrentAgent(this.getClass().getSimpleName(),
                         "completed", 1627576500000L)));//(SeraphPayloadHandler.getInitTimeToSync()));
         kafkaProducer.flush();
 
-
-//        return true;
     }
 }

@@ -27,7 +27,7 @@ public class ProjectionResultRecord extends CypherResultRecord {
      */
     public ProjectionResultRecord(){
         this.resultRecord = new JSONObject();
-        this.resultRecord.put("registeredQueryName", QueryConfiguration.getQueryConfiguration().getRegisteredQueryName());
+//        this.resultRecord.put("registeredQueryName", QueryConfiguration.getQueryConfiguration().getRegisteredQueryName()); //todo
         this.resultRecord.put("items", new JSONArray());
     }
 

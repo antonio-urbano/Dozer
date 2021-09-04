@@ -15,21 +15,27 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import java.time.Duration;
 import java.util.Collections;
 
+/*
+classe utilizzata dal ticker processor event
+legge da input topic delle relazioni (partendo da offset_to_read)
+Ha un contatore interno, quando raggiunge il treshold (window_event_range)
+aggiorna il timestamp_to_synch e l'offset_to_read
+ */
 
 public class TickerEventInputReader {
 
-    static Long[] readCreateEvent(TopicPartition topicPartition, Long eventRange, Long offset_to_read) {
+    static Long[] readCreateEvent(TopicPartition topicPartition, Long eventRange, Long offsetToRead) {
 
         ConsumerFactory<String, Neo4jObj> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(Neo4jObj.class));
         Consumer<String, Neo4jObj> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartition));
 
 
-        if(offset_to_read==null)
-            offset_to_read=consumer.beginningOffsets(Collections.singletonList(topicPartition)).get(topicPartition);
+        if(offsetToRead==null)
+            offsetToRead=consumer.beginningOffsets(Collections.singletonList(topicPartition)).get(topicPartition);
 
 
-        consumer.seek(topicPartition, offset_to_read);
+        consumer.seek(topicPartition, offsetToRead);
         Long counter=0L;
         Long[] return_values = new Long[2];
         while (true) {
@@ -38,11 +44,11 @@ public class TickerEventInputReader {
                 for (ConsumerRecord<String, Neo4jObj> r : records.records(topicPartition)) {
                     if (counter<eventRange) {
                         counter++;
-                        offset_to_read = r.offset() + 1;
+                        offsetToRead = r.offset() + 1;
                     }
                     else{
                         return_values[0] = r.timestamp();
-                        return_values[1] = offset_to_read;
+                        return_values[1] = offsetToRead;
                         return return_values;
                     }
                 }

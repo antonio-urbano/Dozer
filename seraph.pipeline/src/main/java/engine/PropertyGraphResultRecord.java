@@ -34,7 +34,7 @@ public class PropertyGraphResultRecord extends CypherResultRecord{
         this.resultRecord = new JSONObject();
         this.resultRecord.put("nodes", new JSONArray());
         this.resultRecord.put("edges", new JSONArray());
-        this.resultRecord.put("registeredQueryName", QueryConfiguration.getQueryConfiguration().getRegisteredQueryName());
+//        this.resultRecord.put("registeredQueryName", QueryConfiguration.getQueryConfiguration().getRegisteredQueryName()); //todo
 
     }
 

@@ -1,8 +1,5 @@
 package engine;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SeraphPayload {
@@ -18,7 +15,7 @@ public class SeraphPayload {
     private String cypher_query;
 
     // SeraphQueryTicker, TimeManagedConsumer, CypherQueryHandler
-    private Long timestamp_to_sync;
+    private Long timestampToSync;
 
 
     public String getQuery_id() { return query_id; }
@@ -42,8 +39,8 @@ public class SeraphPayload {
     public Long getEmit_time_range() { return emit_time_range; }
     public void setEmit_time_range(Long emit_time_range) { this.emit_time_range = emit_time_range; }
 
-    public Long getTimestamp_to_sync() { return timestamp_to_sync; }
-    public void setTimestamp_to_sync(Long timestamp_to_sync) { this.timestamp_to_sync = timestamp_to_sync; }
+    public Long getTimestampToSync() { return timestampToSync; }
+    public void setTimestampToSync(Long timestampToSync) { this.timestampToSync = timestampToSync; }
 
     public String getCypher_query() { return cypher_query; }
     public void setCypher_query(String cypher_query) { this.cypher_query = cypher_query; }

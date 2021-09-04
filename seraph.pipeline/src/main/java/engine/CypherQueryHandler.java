@@ -1,6 +1,5 @@
-package processors;
+package engine;
 
-import engine.*;
 import org.json.JSONObject;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
@@ -10,16 +9,16 @@ import org.neo4j.driver.util.Pair;
 
 import java.util.List;
 
-public class CypherQueryHandler_2 implements AutoCloseable{
+public class CypherQueryHandler implements AutoCloseable{
 
     private Driver driver;
     private String cypherQuery = "MATCH  (patient:Patient)-[t:TESTED_FOR {positive:true}]->(virus:Virus) RETURN DISTINCT patient.name, virus.name;";    //todo
     private String kafkaTopic = "resulttopic2"; //todo
 
-    public CypherQueryHandler_2(String uri, String user, String password)
+
+    public CypherQueryHandler(String uri, String user, String password)
     {
         this.driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password));
-
     }
 
     /**
@@ -47,6 +46,9 @@ public class CypherQueryHandler_2 implements AutoCloseable{
         }
     }
 
+    /**
+     * Write the result record into kafka
+     */
     public void cypherResultIntoKafka(){
         KafkaResultProducer kafkaResultProducer = new KafkaResultProducer();
         JSONObject jsonQueryResult = runQuery();

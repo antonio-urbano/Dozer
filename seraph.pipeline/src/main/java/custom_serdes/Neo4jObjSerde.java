@@ -1,10 +1,13 @@
-package processors;
+package custom_serdes;
 
 import engine.*;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 
+/**
+ * Custom Serde for the {@link Neo4jObj}
+ */
 public class Neo4jObjSerde implements Serde<Neo4jObj> {
 
     private final JsonSerializer<Neo4jObj> serializer = new JsonSerializer<>();

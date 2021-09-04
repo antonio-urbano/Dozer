@@ -52,7 +52,7 @@ public class CypherResultRecord {
 
     //TODO handle this
     public JSONObject produceRecord(List<Pair<String, Value>> fields) {
-        this.resultRecord.put("registeredQueryName", QueryConfiguration.getQueryConfiguration().getRegisteredQueryName());
+//        this.resultRecord.put("registeredQueryName", QueryConfiguration.getQueryConfiguration().getRegisteredQueryName()); //todo
         return null;
     }
 

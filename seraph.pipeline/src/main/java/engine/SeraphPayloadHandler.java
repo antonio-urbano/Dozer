@@ -2,7 +2,6 @@ package engine;
 
 import config.KafkaConfigProperties;
 import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -14,11 +13,10 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Map;
 
 public class SeraphPayloadHandler {
 
-    final static String REGISTERED_QUERIES_TOPIC="registered-queries-topic19";
+    final static String REGISTERED_QUERIES_TOPIC="registered-queries-topic";      // todo topic name
 
 
     //todo handle read first record when neo4j is not populated
@@ -33,7 +31,7 @@ public class SeraphPayloadHandler {
     public void writePayloadIntoKafka(SeraphPayload payload){
         Producer<String, SeraphPayload> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
         kafkaProducer.flush();
-        payload.setTimestamp_to_sync(getInitTimeToSync());
+        payload.setTimestampToSync(getInitTimeToSync());
         kafkaProducer.send(new ProducerRecord<>(REGISTERED_QUERIES_TOPIC, payload));
     }
 

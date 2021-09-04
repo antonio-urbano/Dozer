@@ -14,7 +14,7 @@ import org.apache.kafka.streams.state.KeyValueStore;
 public class TickerProcessorTime implements Processor<String, CurrentAgent> {
     private ProcessorContext context;
     private KeyValueStore<String, CurrentAgent> kvStore;
-    private final long windowTimeRange =120000L;   // todo time range value
+    private long windowTimeRange =120000L;   // todo time range value
 
 
 
@@ -36,7 +36,7 @@ public class TickerProcessorTime implements Processor<String, CurrentAgent> {
         if (currentAgent.getAgentName().equals(SeraphQueryParser.class.getSimpleName())
         && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", currentAgent.getTimestamp_to_sync());
+                    "completed", currentAgent.getTimestampToSync());
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();
@@ -45,7 +45,7 @@ public class TickerProcessorTime implements Processor<String, CurrentAgent> {
         else if(currentAgent.getAgentName().equals(CypherHandlerProcessor.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", currentAgent.getTimestamp_to_sync() + windowTimeRange);
+                    "completed", currentAgent.getTimestampToSync() + windowTimeRange);
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();

@@ -1,8 +1,8 @@
 package engine;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import config.KafkaConfigProperties;
-import engine.*;
+import custom_serdes.JsonDeserializer;
+import custom_serdes.JsonSerializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -11,19 +11,13 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.state.StoreBuilder;
-import org.apache.kafka.streams.state.Stores;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.kafka.support.serializer.JsonSerde;
 
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 
-public final class DeleteStreamProducer_2 {
+public final class DeleteStreamProducer {
 
     /**
      * Starting from creation records in CDC format it produces deletion records with a customized timestamp.
@@ -69,11 +63,11 @@ public final class DeleteStreamProducer_2 {
 /*
         // create store
         StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore("queue-store"),
+                Stores.persistentKeyValueStore("queue-store"),      //todo store name
                 Serdes.String(),
                 outputArrayObjSerde);
         builder.addStateStore(storeBuilder);
-        stream.process(DeleteProducerByEvent::new,"queue-store");
+        stream.process(DeleteProducerByEvent::new,"queue-store");       //todo store name
 */
 
         stream.to("tmpDeleteTopic", Produced.with(stringSerde, outputObjSerde));
