@@ -11,7 +11,11 @@ import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 
-
+/**
+ * Processor to handle the consumption of the deletion records in CDC format
+ * at proper time by using the {@link TimeManagedConsumer}.
+ * It corresponds to the first processor triggered after the TickerProcessor ends its process.
+ */
 public class TimeManagedProcessorDeletion implements Processor<String, CurrentAgent> {
 
     private ProcessorContext context;
@@ -50,7 +54,8 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
             this.kvStore.put("key", updatedAgent);
             context.forward("key",updatedAgent);
             context.commit();
-        }    }
+        }
+    }
 
 
         @Override

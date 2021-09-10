@@ -10,7 +10,12 @@ import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 
-
+/**
+ * Processor to handle the cypher query part.
+ * Once the {@link TimeManagedProcessorInsertion} ends its process, it uses the
+ * {@link CypherQueryHandler} to run the cypher query associated parsed from the seraph query
+ * and write the result into a kafka topic
+ */
 public class CypherHandlerProcessor implements Processor<String, CurrentAgent> {
     private ProcessorContext context;
     private CypherQueryHandler cypherHandler;

@@ -24,7 +24,7 @@ public class CypherQueryHandler implements AutoCloseable{
     /**
      * Establish the connection with the neo4j instance and run the cypher query
      * The result is then transformed in proper json format {@link CypherResultRecord}
-     * @return
+     * @return the result of the cypher query as JSONObject format
      */
     private JSONObject runQuery() {
         try (Session session = driver.session()) {
@@ -53,7 +53,7 @@ public class CypherQueryHandler implements AutoCloseable{
         KafkaResultProducer kafkaResultProducer = new KafkaResultProducer();
         JSONObject jsonQueryResult = runQuery();
         if (jsonQueryResult==null)
-            System.err.println("Null query result");
+            System.err.println("Null query result");        //todo null query result
         else  kafkaResultProducer.producerResultRecord(this.kafkaTopic, jsonQueryResult);
 
     }

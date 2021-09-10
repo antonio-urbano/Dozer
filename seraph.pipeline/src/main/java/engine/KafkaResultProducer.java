@@ -18,12 +18,12 @@ public class KafkaResultProducer {
     }
 
     /**
-     * Produce the message into the kafka topic
+     * Produce the cypherResult into the kafka topic
      * @param outputTopic name of the output topic defined into the register seraph query
-     * @param message the json object corresponding to the cypher query result
+     * @param cypherResult the json object corresponding to the cypher query result
      */
-    public void producerResultRecord(String outputTopic, JSONObject message) {
-        this.kafkaProducer.send(new ProducerRecord<>(outputTopic, message.toMap()));
+    public void producerResultRecord(String outputTopic, JSONObject cypherResult) {
+        this.kafkaProducer.send(new ProducerRecord<>(outputTopic, cypherResult.toMap()));
     }
 
 }

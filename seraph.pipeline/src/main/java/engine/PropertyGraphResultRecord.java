@@ -27,7 +27,7 @@ public class PropertyGraphResultRecord extends CypherResultRecord{
      * <ul>
      *     <li>nodes: array of nodes formatted according to PG notation</li>
      *     <li>edges: array of relationships formatted according to PG notation</li>
-     *     <li>registeredQueryName: name of the registered query</li>
+     *     <li>registeredQueryName: name of the registered query</li>       //todo
      * </ul>
      */
     public PropertyGraphResultRecord(){
@@ -85,7 +85,7 @@ public class PropertyGraphResultRecord extends CypherResultRecord{
      * Transform a neo4j relationship instance {@link Relationship}
      * to json object formatted according to PG notation
      * @param relationship neo4j relationship instance to be transformed
-     * @return the corresponding json object
+     * @return the relationship in PG notation as JSONObject
      */
     private JSONObject relationshipToJSONRelationship(Relationship relationship) {
 
@@ -107,7 +107,7 @@ public class PropertyGraphResultRecord extends CypherResultRecord{
      * Transform a neo4j node instance {@link Node}
      * to json object formatted according to PG notation
      * @param node neo4j node instance to be transformed
-     * @return the corresponding json object
+     * @return the node in PG notation as JSONObject
      */
     private JSONObject nodeToJSONNode (Node node){
 
@@ -123,7 +123,7 @@ public class PropertyGraphResultRecord extends CypherResultRecord{
      * Transform the properties associated to a node/relationship instance
      * into a json object formatted according to PG notation
      * @param objMap Map of properties, where the key is the property name while the value the property value
-     * @return the corresponding json object
+     * @return the properties in PG notation as JSONObject
      */
     private JSONObject propertiesToJSONProperties (Map<String,Object> objMap){
 

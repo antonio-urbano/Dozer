@@ -11,8 +11,8 @@ import org.neo4j.driver.util.Pair;
 import java.util.List;
 
 /**
- * Cypher result record format corresponding to the case in which
- * the fields of the cypher query contains only projections over node/relationships attributes
+ * Cypher result record format in which the fields of the cypher query
+ * contains only projections over node/relationships attributes
  */
 public class ProjectionResultRecord extends CypherResultRecord {
 
@@ -22,7 +22,7 @@ public class ProjectionResultRecord extends CypherResultRecord {
      * The result record consists of:
      * <ul>
      *     <li>items: array of projections over nodes/relationships attributes</li>
-     *     <li>registeredQueryName: name of the registered query</li>
+     *     <li>registeredQueryName: name of the registered query</li>       //todo
      * </ul>
      */
     public ProjectionResultRecord(){

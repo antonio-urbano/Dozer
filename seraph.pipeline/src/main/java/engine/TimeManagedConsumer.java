@@ -14,7 +14,7 @@ import java.time.Duration;
 import java.util.Collections;
 
 /**
- * Class to handle the consumption at proper timestamp
+ * This class is used to handle the consumption from Kafka at proper timestamp
  */
 public class TimeManagedConsumer {
 

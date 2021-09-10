@@ -11,7 +11,11 @@ import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 
-
+/**
+ * Processor to handle the consumption of the creation records in CDC format
+ * at proper time by using the {@link TimeManagedConsumer}.
+ * The process starts after the {@link TimeManagedProcessorInsertion} ends its process.
+ */
 public class TimeManagedProcessorInsertion implements Processor<String, CurrentAgent> {
 
     private ProcessorContext context;

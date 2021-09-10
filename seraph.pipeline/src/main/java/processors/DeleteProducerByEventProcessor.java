@@ -13,21 +13,28 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * Processor used to generate the {@link OutputObj} instances, i.e. deletion records in CDC format,
+ * starting from {@link Neo4jObj} instances, i.e. creation records in CDC format.
+ * These records will be published into a temporary kafka topic consumed by the {@link TimeManagedProcessorDeletion}.
+ * The frequency of publication into the temporary topic depends on the window range defined into the seraph
+ * query in terms of number of events.
+ */
 public class DeleteProducerByEventProcessor implements Processor<String, Neo4jObj> {
 
     private ProcessorContext context;
-    private final int QUEUE_SIZE = 3;
+    private final int windowEventRange = 3;       //todo
     private KeyValueStore<String, Queue<Object>> kvStore;
-    private Queue<Object> queueProva;
+    private Queue<Object> eventQueue;
     Producer<String, Object> kafkaProducer;
 
     @Override
     public void init(ProcessorContext processorContext) {
         this.context = processorContext;
         this.kvStore = (KeyValueStore) this.context.getStateStore("queue-event-store");     //todo store name
-        this.queueProva = this.kvStore.get("key"); //todo key
-        if (this.queueProva==null)
-            this.queueProva = new LinkedList<>();
+        this.eventQueue = this.kvStore.get("key"); //todo key
+        if (this.eventQueue ==null)
+            this.eventQueue = new LinkedList<>();
         this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
     }
 
@@ -39,13 +46,13 @@ public class DeleteProducerByEventProcessor implements Processor<String, Neo4jOb
                 && neo4jObj.getPayload().get("start")!=null)
             outputObj = new OutputObj(neo4jObj, 0L);
         if (outputObj!=null)
-            queueProva.add(outputObj);
+            eventQueue.add(outputObj);
 
-        if(queueProva.size()>QUEUE_SIZE){
-            kafkaProducer.send(new ProducerRecord<>("tmpDeleteTopic", queueProva.remove()));
+        if(eventQueue.size()> windowEventRange){
+            kafkaProducer.send(new ProducerRecord<>("tmpDeleteTopic", eventQueue.remove()));    //todo tmpDeleteTopic
             kafkaProducer.flush();
         }
-        this.kvStore.put("key", queueProva);
+        this.kvStore.put("key", eventQueue);
         this.context.commit();
     }
 

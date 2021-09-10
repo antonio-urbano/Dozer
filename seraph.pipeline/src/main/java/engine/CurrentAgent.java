@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 
 /**
- * This class is used as token to synchronize the several components of the topology of
+ * This class is used as token to synchronize the several processors in the topology of
  * the Dozer Application {@link DozerApplication}
  */
 

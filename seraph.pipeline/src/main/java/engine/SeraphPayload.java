@@ -1,7 +1,6 @@
 package engine;
 
-
-//@JsonInclude(JsonInclude.Include.NON_NULL)
+//todo handle with the QueryConfigListener
 public class SeraphPayload {
 
     // SeraphQueryParser payload

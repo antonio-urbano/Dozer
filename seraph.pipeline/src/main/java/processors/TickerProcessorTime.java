@@ -2,6 +2,7 @@ package processors;
 
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
+import engine.CypherQueryHandler;
 import engine.SeraphQueryParser;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -10,7 +11,13 @@ import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 
-
+/**
+ * Processor to handle the synchronization between all the processors in the topology according to the EVERY
+ * operator defined in terms of time expressed as Milliseconds.
+ * The processor initialize the timestampToSync, i.e. the timestamp to which all the components have to synchronize,
+ * after the {@link SeraphQueryParser} ends to parse the seraph query.
+ * Later, every time the {@link CypherQueryHandler} ends its process, it updates the timestampToSync
+ */
 public class TickerProcessorTime implements Processor<String, CurrentAgent> {
     private ProcessorContext context;
     private KeyValueStore<String, CurrentAgent> kvStore;

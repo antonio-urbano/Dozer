@@ -8,14 +8,14 @@ import org.apache.kafka.streams.processor.TimestampExtractor;
  * to add a delay equals to the window time range to the kafka record built-in timestamp
  */
 public class CustomerExtractor implements TimestampExtractor {
-    long window_range;
+    long windowTimeRange;
 
-    public CustomerExtractor(long window_range) {
-        this.window_range = window_range;
+    public CustomerExtractor(long windowTimeRange) {
+        this.windowTimeRange = windowTimeRange;
     }
 
     @Override
     public long extract(ConsumerRecord<Object, Object> consumerRecord, long l) {
-        return consumerRecord.timestamp() + this.window_range;
+        return consumerRecord.timestamp() + this.windowTimeRange;
     }
 }

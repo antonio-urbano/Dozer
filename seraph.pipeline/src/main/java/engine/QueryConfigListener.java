@@ -5,9 +5,10 @@ import seraphGrammar.SeraphParser;
 import seraphGrammar.SeraphParserBaseListener;
 import java.time.Duration;
 
+//todo handle how to use this class with SeraphPayload
 /**
  * This class is used to parse the registered query and update the important fields used
- * by all the components of the engine {@link QueryConfiguration}
+ * by all the components of the engine
  * It extends the {@link SeraphParserBaseListener} to handle a subset of its methods.
  */
 public class QueryConfigListener extends SeraphParserBaseListener {
