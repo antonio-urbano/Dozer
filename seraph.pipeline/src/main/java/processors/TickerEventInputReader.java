@@ -33,14 +33,14 @@ public class TickerEventInputReader {
      * Method called by the {@link TickerProcessorEvent} to read from the input topic starting from the
      * offsetToRead.
      * Every time a new input record is read an internal counter is incremented and once the counter is equal
-     * to the windowEventRange the methods returns both the updated offsetToRead and the timestamp associated
+     * to the emitEveryEventRange the methods returns both the updated offsetToRead and the timestamp associated
      * to the last consumed record
      * @param topicPartition associated to the input topic from which consume
-     * @param windowEventRange defines the frequency of the evaluation process
+     * @param emitEveryEventRange defines the frequency of the evaluation process
      * @param offsetToRead offset from which start to read (initially set to 0)
      * @return both the updated offsetToRead and the timestamp associated to the last consumed record
      */
-    static Long[] readCreateEvent(TopicPartition topicPartition, Long windowEventRange, Long offsetToRead) {
+    static Long[] readCreateEvent(TopicPartition topicPartition, Long emitEveryEventRange, Long offsetToRead) {
 
         ConsumerFactory<String, Neo4jObj> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(Neo4jObj.class));
         Consumer<String, Neo4jObj> consumer = cf.createConsumer();
@@ -58,7 +58,7 @@ public class TickerEventInputReader {
             ConsumerRecords<String, Neo4jObj> records = consumer.poll(Duration.ofMillis(100));
             if (!records.isEmpty()) {
                 for (ConsumerRecord<String, Neo4jObj> r : records.records(topicPartition)) {
-                    if (counter<windowEventRange) {
+                    if (counter<emitEveryEventRange) {
                         counter++;
                         offsetToRead = r.offset() + 1;
                     }

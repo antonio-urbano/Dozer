@@ -26,7 +26,7 @@ public class QueryConfigListener extends SeraphParserBaseListener {
     @Override public void enterOS_QueryName(SeraphParser.OS_QueryNameContext ctx)  {
         // query Name: people_to_be_tested
 //        queryConfiguration.setRegisteredQueryName(ctx.getText());
-        this.seraphPayload.setQuery_id(ctx.getText());
+        this.seraphPayload.setQueryId(ctx.getText());
 //        this.currentAgent.updatePayload("query_id",ctx.getText());
     }
 
@@ -40,7 +40,7 @@ RETURN DISTINCT person.name, virus.name ;
          */
 //        queryConfiguration.setCypherQuery(ctx.getText());
 //        this.currentAgent.updatePayload("cypher_query", ctx.getText());
-        this.seraphPayload.setCypher_query(ctx.getText());
+        this.seraphPayload.setCypherQuery(ctx.getText());
 
     }
 
@@ -52,7 +52,7 @@ RETURN DISTINCT person.name, virus.name ;
 //        queryConfiguration.setInput_broker(broker);
 //        queryConfiguration.setInput_topic(kafka_topic);
 //        this.currentAgent.updatePayload("input_stream_topic", kafka_topic);
-        this.seraphPayload.setInput_stream_topic(kafka_topic);
+        this.seraphPayload.setInputStreamTopic(kafka_topic);
 
     }
 
@@ -66,7 +66,7 @@ RETURN DISTINCT person.name, virus.name ;
         }
 //        queryConfiguration.setTime_instant(timeInstant);
 //        this.currentAgent.updatePayload("time_instant", timeInstant);
-        this.seraphPayload.setTime_instant(timeInstant);
+        this.seraphPayload.setTimeInstant(timeInstant);
     }
 
 
@@ -90,7 +90,7 @@ RETURN DISTINCT person.name, virus.name ;
         Duration duration = Duration.parse(ctx.getText());
 //        queryConfiguration.setWindow_time_range(duration.toMillis());
 //        this.currentAgent.updatePayload("every_time_operator", duration.toMillis());
-        this.seraphPayload.setEmit_time_range(duration.toMillis());
+        this.seraphPayload.setEmitEveryTimeRange(duration.toMillis());
     }
 
 
@@ -105,7 +105,7 @@ RETURN DISTINCT person.name, virus.name ;
         }
 //        queryConfiguration.setStreaming_operator(streamingOperator);
 //        this.currentAgent.updatePayload("streaming_operator", streamingOperator);
-        this.seraphPayload.setStreaming_operator(streamingOperator);
+        this.seraphPayload.setStreamingOperator(streamingOperator);
 
     }
 
@@ -118,7 +118,7 @@ RETURN DISTINCT person.name, virus.name ;
 //        queryConfiguration.setOutput_broker(broker);
 //        queryConfiguration.setOutput_topic(kafka_topic);
 //        this.currentAgent.updatePayload("output_stream_topic", kafka_topic);
-        this.seraphPayload.setOutput_stream_topic(kafka_topic);
+        this.seraphPayload.setOutputStreamTopic(kafka_topic);
     }
 
     @Override public void enterOS_EmitRange(SeraphParser.OS_EmitRangeContext ctx) {
@@ -132,7 +132,7 @@ RETURN DISTINCT person.name, virus.name ;
     @Override public void enterOS_EmitTimeRange(SeraphParser.OS_EmitTimeRangeContext ctx) {
         //PT5M
         Duration duration = Duration.parse(ctx.getText());
-        this.seraphPayload.setEmit_time_range(duration.toMillis());
+        this.seraphPayload.setEmitEveryTimeRange(duration.toMillis());
     }
 
 }

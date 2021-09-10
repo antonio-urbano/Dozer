@@ -19,6 +19,7 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 
+//todo javadoc
 public class DozerApplication {
 
     static Properties getProcessorProperties(){

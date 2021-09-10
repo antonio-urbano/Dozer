@@ -27,7 +27,7 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
     private KeyValueStore<String, CurrentAgent> kvStore;
     private KeyValueStore<String, Long> offsetKvStore;
     private Long[] timestampToSync_offsetToRead;
-    private Long windowEventRange = 5L;        // todo event range value
+    private Long emitEveryEventRange = 5L;        // todo event range value
 
 
 
@@ -63,7 +63,7 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
                 && currentAgent.getStatus().equals("completed")){
             this.timestampToSync_offsetToRead = TickerEventInputReader.readCreateEvent
                     (new TopicPartition("relationships", 0),
-                            windowEventRange, this.offsetKvStore.get("value-ticker-event"));
+                            emitEveryEventRange, this.offsetKvStore.get("value-ticker-event"));
 
             Long timestampToSync = this.timestampToSync_offsetToRead[0];
             Long offsetToRead = this.timestampToSync_offsetToRead[1];

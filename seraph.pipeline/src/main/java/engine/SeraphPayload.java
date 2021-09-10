@@ -4,45 +4,45 @@ package engine;
 public class SeraphPayload {
 
     // SeraphQueryParser payload
-    private String query_id;
-    private String input_stream_topic;
-    private long window_size;
-    private TimeInstant time_instant;
-    private String output_stream_topic;     // CypherQueryHandler
-    private StreamingOperator streaming_operator;
-    private Long emit_time_range;
-    private String cypher_query;
+    private String queryId;
+    private String inputStreamTopic;
+    private long windowRange;       //todo timeRange and eventRange
+    private TimeInstant timeInstant;
+    private String outputStreamTopic;
+    private StreamingOperator streamingOperator;
+    private Long emitEveryTimeRange;         //todo emitEveryEventRange
+    private String cypherQuery;
 
     // SeraphQueryTicker, TimeManagedConsumer, CypherQueryHandler
     private Long timestampToSync;
 
 
-    public String getQuery_id() { return query_id; }
-    public void setQuery_id(String query_id) { this.query_id = query_id; }
+    public String getQueryId() { return queryId; }
+    public void setQueryId(String queryId) { this.queryId = queryId; }
 
-    public String getInput_stream_topic() { return input_stream_topic; }
-    public void setInput_stream_topic(String input_stream_topic) { this.input_stream_topic = input_stream_topic; }
+    public String getInputStreamTopic() { return inputStreamTopic; }
+    public void setInputStreamTopic(String inputStreamTopic) { this.inputStreamTopic = inputStreamTopic; }
 
-    public long getWindow_size() { return window_size; }
-    public void setWindow_size(long window_size) { this.window_size = window_size; }
+    public long getWindowRange() { return windowRange; }
+    public void setWindowRange(long windowRange) { this.windowRange = windowRange; }
 
-    public TimeInstant getTime_instant() { return time_instant; }
-    public void setTime_instant(TimeInstant time_instant) { this.time_instant = time_instant; }
+    public TimeInstant getTimeInstant() { return timeInstant; }
+    public void setTimeInstant(TimeInstant timeInstant) { this.timeInstant = timeInstant; }
 
-    public String getOutput_stream_topic() { return output_stream_topic; }
-    public void setOutput_stream_topic(String output_stream_topic) { this.output_stream_topic = output_stream_topic; }
+    public String getOutputStreamTopic() { return outputStreamTopic; }
+    public void setOutputStreamTopic(String outputStreamTopic) { this.outputStreamTopic = outputStreamTopic; }
 
-    public StreamingOperator getStreaming_operator() { return streaming_operator; }
-    public void setStreaming_operator(StreamingOperator streaming_operator) { this.streaming_operator = streaming_operator; }
+    public StreamingOperator getStreamingOperator() { return streamingOperator; }
+    public void setStreamingOperator(StreamingOperator streamingOperator) { this.streamingOperator = streamingOperator; }
 
-    public Long getEmit_time_range() { return emit_time_range; }
-    public void setEmit_time_range(Long emit_time_range) { this.emit_time_range = emit_time_range; }
+    public Long getEmitEveryTimeRange() { return emitEveryTimeRange; }
+    public void setEmitEveryTimeRange(Long emitEveryTimeRange) { this.emitEveryTimeRange = emitEveryTimeRange; }
 
     public Long getTimestampToSync() { return timestampToSync; }
     public void setTimestampToSync(Long timestampToSync) { this.timestampToSync = timestampToSync; }
 
-    public String getCypher_query() { return cypher_query; }
-    public void setCypher_query(String cypher_query) { this.cypher_query = cypher_query; }
+    public String getCypherQuery() { return cypherQuery; }
+    public void setCypherQuery(String cypherQuery) { this.cypherQuery = cypherQuery; }
 
 //    public Map<String, Object> getPayload(String agentName){
 //        Map<String, Object> payload = new HashMap<>();
