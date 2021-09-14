@@ -115,6 +115,10 @@ public class DozerApplication {
 
         public static void main(final String[] args) {
 
+            //todo flag
+            boolean tickerTimeFlag = true;      //true = ticker time, false = ticker event
+            boolean deleteProdTimeFlag = true;  //true = delete producer by time, false = delete producer by events
+
             JsonSerializer<CurrentAgent> agentJsonSerializer = new JsonSerializer<>();
             JsonDeserializer<CurrentAgent> agentJsonDeserializer = new JsonDeserializer<>(
                     CurrentAgent.class);
@@ -125,81 +129,69 @@ public class DozerApplication {
 
 
             final Topology builder = new Topology();
-            final Topology deleteByEvent_topology = new Topology();
-            final StreamsBuilder builder_deleteRecordByTime = new StreamsBuilder();
 
-//        produceDeleteRecordByTime(builder_deleteRecordByTime, 300000L);
-        produceDeleteRecordByEvent(deleteByEvent_topology);
+            final StreamsBuilder builder_deleteRecordByTime = new StreamsBuilder();
+            final Topology deleteByEvent_topology = new Topology();
+            if(deleteProdTimeFlag)
+                produceDeleteRecordByTime(builder_deleteRecordByTime, 300000L);     //todo
+            else
+                produceDeleteRecordByEvent(deleteByEvent_topology);
+
+
 
 
         builder.addSource("Source", "processor-topic");     // todo topic name
 
-
-        builder.addProcessor("TickerProcessorTime", TickerProcessorTime::new, "Source");
-//        builder.addProcessor("TickerProcessorEvent", TickerProcessorEvent::new, "Source");
+            if (tickerTimeFlag)
+                builder.addProcessor("TickerProcessor", TickerProcessorTime::new, "Source");
+            else
+                builder.addProcessor("TickerProcessor", TickerProcessorEvent::new, "Source");
         builder.addProcessor("TimeManagedProcessorDeletion", TimeManagedProcessorDeletion::new, "Source");
         builder.addProcessor("TimeManagedProcessorInsertion", TimeManagedProcessorInsertion::new, "Source");
         builder.addProcessor("CypherHandlerProcessor", CypherHandlerProcessor::new, "Source");
-
 
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("agent-store"),        //todo store name
                 Serdes.String(),
                 agentSerde),
-                "TickerProcessorTime", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
+                "TickerProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("offset-store"),       //todo store name
                 Serdes.String(),
                 longSerde),
-                "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "TickerProcessorTime");
-
+                "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "TickerProcessor");
 
             // todo topic name
-        builder.addSink("Sink", "processor-topic","TickerProcessorTime", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
+        builder.addSink("Sink", "processor-topic","TickerProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
 
         final KafkaStreams streams = new KafkaStreams(builder, getProcessorProperties());
-        final KafkaStreams streams_delete_byEvent = new KafkaStreams(deleteByEvent_topology, getStreamDeleteByEventProperties());
-//        final CountDownLatch delete_latch = new CountDownLatch(1);
-//        final KafkaStreams streams_delete_byTime = new KafkaStreams(builder_deleteRecordByTime.build(), getStreamDeleteByTimeProperties());
         final CountDownLatch latch = new CountDownLatch(2);
-
-
+        final KafkaStreams streamsDeleteProducer;
+        if (deleteProdTimeFlag)
+            streamsDeleteProducer = new KafkaStreams(builder_deleteRecordByTime.build(), getStreamDeleteByTimeProperties());
+        else
+            streamsDeleteProducer = new KafkaStreams(deleteByEvent_topology, getStreamDeleteByEventProperties());
 
 
         // attach shutdown handler to catch control-c
-        Runtime.getRuntime().addShutdownHook(new Thread("streams-wordcount-shutdown-hook") {
+        Runtime.getRuntime().addShutdownHook(new Thread("dozer-streams-shutdown-hook") {
             @Override
             public void run() {
                 streams.close();
-
-//                streams_delete_byTime.close();
-                streams_delete_byEvent.close();
-
+                streamsDeleteProducer.close();
                 latch.countDown();
             }
         });
 
-//        Runtime.getRuntime().addShutdownHook(new Thread("delete-thread-shutdown-hook") {
-//            @Override
-//            public void run() {
-//                streams_delete_byTime.close();
-////                streams.close();
-//                delete_latch.countDown();
-//            }
-//        });
 
         try {
             streams.start();
-
-//            streams_delete_byTime.start();
-            streams_delete_byEvent.start();
-
+            streamsDeleteProducer.start();
             latch.await();
-//            delete_latch.await();
         } catch (final Throwable e) {
             System.exit(1);
         }
