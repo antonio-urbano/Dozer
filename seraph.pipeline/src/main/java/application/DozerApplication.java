@@ -1,9 +1,11 @@
 package application;
 
+import cdc_converter.CdcDeleteRecord;
+import cdc_converter.CdcCreateRecord;
+import custom_serdes.CdcSerde;
 import custom_serdes.CurrentAgentSerde;
 import custom_serdes.JsonDeserializer;
 import custom_serdes.JsonSerializer;
-import custom_serdes.Neo4jObjSerde;
 import engine.*;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
@@ -25,12 +27,11 @@ public class DozerApplication {
     static Properties getProcessorProperties(){
         Properties props = new Properties();
 
-        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "dozer-processors-app");
+        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "dozer-processors-app"); //todo
         props.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.putIfAbsent(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
         props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, CurrentAgentSerde.class);
-        // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
         props.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         return props;
@@ -39,12 +40,11 @@ public class DozerApplication {
     static Properties getStreamDeleteByEventProperties(){
         Properties props = new Properties();
 
-        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "dozer-delete-stream-event-app");
+        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "dozer-delete-stream-event-app");    //todo
         props.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.putIfAbsent(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
         props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Neo4jObjSerde.class);
-        // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
+        props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, CdcSerde.class);
         props.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         return props;
@@ -53,10 +53,9 @@ public class DozerApplication {
     static Properties getStreamDeleteByTimeProperties(){
         Properties props = new Properties();
 
-        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "dozer-delete-stream-time-app");
+        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "dozer-delete-stream-time-app"); //todo
         props.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.putIfAbsent(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
-        // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
         props.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         return props;
@@ -65,31 +64,31 @@ public class DozerApplication {
     static void produceDeleteRecordByTime(final StreamsBuilder builder, Long emit_time_range) {
 
 
-        JsonSerializer<Neo4jObj> neoJsonSerializer = new JsonSerializer<>();
-        JsonDeserializer<Neo4jObj> neoJsonDeserializer = new JsonDeserializer<>(
-                Neo4jObj.class);
-        Serde<Neo4jObj> neoSerde = Serdes.serdeFrom(neoJsonSerializer,
-                neoJsonDeserializer);
+        JsonSerializer<CdcCreateRecord> cdcCreateSerializer = new JsonSerializer<>();
+        JsonDeserializer<CdcCreateRecord> cdcCreateDeserializer = new JsonDeserializer<>(
+                CdcCreateRecord.class);
+        Serde<CdcCreateRecord> cdcCreateSerde = Serdes.serdeFrom(cdcCreateSerializer,
+                cdcCreateDeserializer);
 
-        JsonSerializer<OutputObj> outputSer = new JsonSerializer<>();
-        JsonDeserializer<OutputObj> outputDeser = new JsonDeserializer<>(
-                OutputObj.class);
-        Serde<OutputObj> outputObjSerde = Serdes.serdeFrom(outputSer,
-                outputDeser);
+        JsonSerializer<CdcDeleteRecord> cdcDeleteSerializer = new JsonSerializer<>();
+        JsonDeserializer<CdcDeleteRecord> cdcDeleteDeserializer = new JsonDeserializer<>(
+                CdcDeleteRecord.class);
+        Serde<CdcDeleteRecord> cdcDeleteSerde = Serdes.serdeFrom(cdcDeleteSerializer,
+                cdcDeleteDeserializer);
 
         final Serde<String> stringSerde = Serdes.String();
 
 
-        KStream<String,OutputObj> stream = builder.stream("relationships",
-                Consumed.with(Serdes.String(), neoSerde).
+        KStream<String, CdcDeleteRecord> stream = builder.stream("relationships",
+                Consumed.with(Serdes.String(), cdcCreateSerde).
                         withTimestampExtractor(new CustomerExtractor(emit_time_range)))
-                .filter((_key, neo4jObj) -> neo4jObj!=null)
-                .filter((_key, neo4jObj) -> neo4jObj.getPayload()!=null)
-                .filter((_key, neo4jObj) -> neo4jObj.getMeta().get("operation").equals("created"))
-                .filter((_key, neo4jObj) -> neo4jObj.getPayload().get("start")!=null)
-                .map((k,neo4jObj) -> new KeyValue<>(k, new OutputObj(neo4jObj, emit_time_range)));
+                .filter((_key, cdcCreateRecord) -> cdcCreateRecord!=null)
+                .filter((_key, cdcCreateRecord) -> cdcCreateRecord.getPayload()!=null)
+                .filter((_key, cdcCreateRecord) -> cdcCreateRecord.getMeta().get("operation").equals("created"))
+                .filter((_key, cdcCreateRecord) -> cdcCreateRecord.getPayload().get("start")!=null)
+                .map((k,cdcCreateRecord) -> new KeyValue<>(k, new CdcDeleteRecord(cdcCreateRecord, emit_time_range)));
 
-        stream.to("tmpDeleteTopic", Produced.with(stringSerde, outputObjSerde));
+        stream.to("tmpDeleteTopic", Produced.with(stringSerde, cdcDeleteSerde));
 
     }
 
@@ -101,7 +100,7 @@ public class DozerApplication {
         Serde<Queue> queueSerde = Serdes.serdeFrom(queueSer,
                 queueDeser);
 
-        topology.addSource("RelationshipsSource", "relationships");
+        topology.addSource("RelationshipsSource", "relationships");     //todo
         topology.addProcessor("DeleteProducerByEventProcessor", DeleteProducerByEventProcessor::new, "RelationshipsSource");
         topology.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("queue-event-store3"),      //todo store name

@@ -1,7 +1,6 @@
 package config;
 
 
-import engine.Neo4jObj;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -42,7 +41,7 @@ public class KafkaConfigProperties {
 
     /**
      * The consumer will be built using the ConsumerFactory pattern {@link org.springframework.kafka.core.ConsumerFactory}
-     * to allow to consume complex records where the value corresponds to the Neo4jObj object
+     * to allow to consume complex records where the value corresponds to the CdcCreateRecord object
      * @return the kafka consumer configs {@link ConsumerConfig}
      */
     public static Map<String, Object> getKafkaConsumerProperties(Class<?> deserializerClass) {

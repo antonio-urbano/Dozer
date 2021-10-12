@@ -1,15 +1,9 @@
 package cdc_converter;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import config.KafkaConfigProperties;
-import engine.CurrentAgent;
-import engine.Neo4jObj;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.kstream.Transformer;
-import org.apache.kafka.streams.kstream.TransformerSupplier;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
@@ -19,11 +13,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ProcessorConverter implements Processor<String, PropertyGraph> {
+public class ProcessorConverter implements Processor<String, JsonPG> {
 
     private KeyValueStore<String, Integer> kvStore;
     private ProcessorContext context;
-    private Producer<String, CdcRecord> kafkaProducer;
+    private Producer<String, CdcCreateRecord> kafkaProducer;
     private final String outputTopic = "convertedTopic";
 
 
@@ -36,17 +30,17 @@ public class ProcessorConverter implements Processor<String, PropertyGraph> {
     }
 
     @Override
-    public void process(String key, PropertyGraph pg) {
+    public void process(String key, JsonPG pg) {
         Integer txEventsCount = pg.getNodes().size() + pg.getEdges().size();
         for (PgNode node:pg.getNodes()){//todo params meta
-            CdcRecord cdcNode = new CdcRecord(generateMeta("neo4j", node.getId(),
+            CdcCreateRecord cdcNode = new CdcCreateRecord(generateMeta("neo4j", node.getId(),
                     pg.getNodes().indexOf(node), txEventsCount, "neo4j-source"),
                     generateNodePayload(node), generateSchema(node));
             kafkaProducer.send(new ProducerRecord<>("nodes", cdcNode));
             kafkaProducer.flush();
         }
         for (PgEdge edge:pg.getEdges()){//todo params meta
-            CdcRecord cdcEdge = new CdcRecord(generateMeta("neo4j", edge.getId(),
+            CdcCreateRecord cdcEdge = new CdcCreateRecord(generateMeta("neo4j", edge.getId(),
                     pg.getEdges().indexOf(edge)+pg.getNodes().size(),
                     txEventsCount, "neo4j-source"),
                     generateRelationshipPayload(edge), generateSchema(edge));

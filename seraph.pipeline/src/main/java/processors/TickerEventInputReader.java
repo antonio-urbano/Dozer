@@ -1,7 +1,7 @@
 package processors;
 
+import cdc_converter.CdcCreateRecord;
 import config.KafkaConfigProperties;
-import engine.Neo4jObj;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -42,8 +42,8 @@ public class TickerEventInputReader {
      */
     static Long[] readCreateEvent(TopicPartition topicPartition, Long emitEveryEventRange, Long offsetToRead) {
 
-        ConsumerFactory<String, Neo4jObj> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(Neo4jObj.class));
-        Consumer<String, Neo4jObj> consumer = cf.createConsumer();
+        ConsumerFactory<String, CdcCreateRecord> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class));
+        Consumer<String, CdcCreateRecord> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartition));
 
 
@@ -55,9 +55,9 @@ public class TickerEventInputReader {
         Long counter=0L;
         Long[] return_values = new Long[2];
         while (true) {
-            ConsumerRecords<String, Neo4jObj> records = consumer.poll(Duration.ofMillis(100));
+            ConsumerRecords<String, CdcCreateRecord> records = consumer.poll(Duration.ofMillis(100));
             if (!records.isEmpty()) {
-                for (ConsumerRecord<String, Neo4jObj> r : records.records(topicPartition)) {
+                for (ConsumerRecord<String, CdcCreateRecord> r : records.records(topicPartition)) {
                     if (counter<emitEveryEventRange) {
                         counter++;
                         offsetToRead = r.offset() + 1;

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class PropertyGraph implements Serializable {
+public class JsonPG implements Serializable {
 
     @JsonCreator
-    public PropertyGraph(){}
+    public JsonPG(){}
 
     private ArrayList<PgNode> nodes;
     private ArrayList<PgEdge> edges;

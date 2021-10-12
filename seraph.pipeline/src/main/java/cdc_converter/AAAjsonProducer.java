@@ -13,8 +13,8 @@ import java.io.FileReader;
 public class AAAjsonProducer {
     public static void main(final String[] args) throws FileNotFoundException {
         BufferedReader br = new BufferedReader(new FileReader("/home/antonio/Scrivania/personPgJson.json"));
-        PropertyGraph pg = new Gson().fromJson(br, PropertyGraph.class);
-        final Producer<String, PropertyGraph> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
+        JsonPG pg = new Gson().fromJson(br, JsonPG.class);
+        final Producer<String, JsonPG> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
         kafkaProducer.send(new ProducerRecord<>("JsonPG-topic", pg));
         kafkaProducer.flush();
         kafkaProducer.close();

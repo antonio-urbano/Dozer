@@ -1,4 +1,4 @@
-package engine;
+package cdc_converter;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -10,31 +10,31 @@ import java.util.Map;
 
 /**
  * This class is used to serialize/deserialize the deletion record in CDC format.
- * The deletion record is generated starting from the {@link Neo4jObj} object.
+ * The deletion record is generated starting from the {@link CdcCreateRecord} object.
  */
-@JsonRootName("outputObj")
-public class OutputObj implements Serializable {
+@JsonRootName("cdcDelete")
+public class CdcDeleteRecord implements Serializable {
 
     private Map meta;
     private Map payload;
     private Map schema;
-    private Neo4jObj neo4jObj;
+    private CdcCreateRecord cdcCreate;
 
 
     /**
      * The outputObj corresponds to the "deletion" record in CDC format. It is built
-     * starting from the neo4jObj
-     * @param neo4jObj object corresponding to the "creation" record in CDC format
+     * starting from the cdcCreateRecord
+     * @param cdcCreate object corresponding to the "creation" record in CDC format
      * @param windowTimeRange size of the window for delaying the deletion
      */
     @JsonCreator
-    public OutputObj(@JsonProperty("neo4jObj") Neo4jObj neo4jObj, @JsonProperty("windowTimeRange") Long windowTimeRange){
-        if (neo4jObj!=null) {
-            this.neo4jObj = neo4jObj;
-            this.meta = this.neo4jObj.getMeta();
-            this.payload = this.neo4jObj.getPayload();
-            this.schema = this.neo4jObj.getSchema();
-            this.setBefore((Map) this.neo4jObj.getPayload().get("after"));
+    public CdcDeleteRecord(@JsonProperty("cdcCreate") CdcCreateRecord cdcCreate, @JsonProperty("windowTimeRange") Long windowTimeRange){
+        if (cdcCreate!=null) {
+            this.cdcCreate = cdcCreate;
+            this.meta = this.cdcCreate.getMeta();
+            this.payload = this.cdcCreate.getPayload();
+            this.schema = this.cdcCreate.getSchema();
+            this.setBefore((Map) this.cdcCreate.getPayload().get("after"));
             this.setAfter(null);
             this.meta.put("operation", "deleted");
             this.meta.computeIfPresent("timestamp", (k, v) -> ((long) v) + windowTimeRange);

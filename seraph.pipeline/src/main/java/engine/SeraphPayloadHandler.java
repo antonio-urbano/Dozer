@@ -1,5 +1,6 @@
 package engine;
 
+import cdc_converter.CdcCreateRecord;
 import config.KafkaConfigProperties;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -21,7 +22,7 @@ public class SeraphPayloadHandler {
 
     //todo handle read first record when neo4j is not populated
     public static Long getInitTimeToSync() {
-        ConsumerRecord<String, ?> relationshipRecord =consumeFirstRecord(Neo4jObj.class,new TopicPartition("relationships", 0));
+        ConsumerRecord<String, ?> relationshipRecord =consumeFirstRecord(CdcCreateRecord.class,new TopicPartition("relationships", 0));
         if (relationshipRecord!=null)
             return relationshipRecord.timestamp();
         else return null;

@@ -2,23 +2,35 @@ package cdc_converter;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class is used to serialize/deserialize the creation record in CDC format
+ * {@see https://neo4j.com/labs/kafka/4.0/producer/}
+ */
 @JsonRootName("cdcRecord")
-public class CdcRecord_funzionanteNoJson implements Serializable {
+public class CdcCreateRecord implements Serializable {
     Map meta;
     Map payload;
     Map schema;
 
-    @JsonCreator
-    public CdcRecord_funzionanteNoJson(){
+    public CdcCreateRecord(){
         this.meta = new HashMap();
         this.payload = new HashMap();
         this.schema = new HashMap();
+    }
+    @JsonCreator
+    public CdcCreateRecord(@JsonProperty("meta") Map meta,
+                           @JsonProperty("payload") Map payload,
+                           @JsonProperty("schema") Map schema){
+        this.meta = meta;
+        this.payload = payload;
+        this.schema = schema;
     }
 
     public Map getMeta() {
