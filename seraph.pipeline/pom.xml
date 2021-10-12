@@ -64,13 +64,11 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-<<<<<<< HEAD
                     <source>11</source>     <!-- todo -->
                     <target>11</target>     <!-- todo -->
-=======
+
                     <source>11</source>
                     <target>11</target>
->>>>>>> ce338d3a8dc456fd2a9c1b7e536a7d71a6e87970
                 </configuration>
             </plugin>
             <plugin>

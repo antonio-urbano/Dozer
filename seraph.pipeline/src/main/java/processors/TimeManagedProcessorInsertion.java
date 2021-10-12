@@ -27,12 +27,12 @@ public class TimeManagedProcessorInsertion implements Processor<String, CurrentA
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store");      // todo store name
-        kvStore = (KeyValueStore) context.getStateStore("agent-store");      // todo store name
+        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store3");      // todo store name
+        kvStore = (KeyValueStore) context.getStateStore("agent-store3");      // todo store name
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic", agent));     //todo topic name
+        kafkaProducer.send(new ProducerRecord<>("processor-topic3", agent));     //todo topic name
         kafkaProducer.flush();
         kafkaProducer.close();
     }

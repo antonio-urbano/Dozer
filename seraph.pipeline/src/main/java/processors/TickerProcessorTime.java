@@ -29,11 +29,11 @@ public class TickerProcessorTime implements Processor<String, CurrentAgent> {
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        this.kvStore = (KeyValueStore) context.getStateStore("agent-store"); //todo name state store
+        this.kvStore = (KeyValueStore) context.getStateStore("agent-store3"); //todo name state store
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic", agent)); //todo topic name
+        kafkaProducer.send(new ProducerRecord<>("processor-topic3", agent)); //todo topic name
         kafkaProducer.flush();
         kafkaProducer.close();
     }

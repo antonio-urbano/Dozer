@@ -104,7 +104,7 @@ public class DozerApplication {
         topology.addSource("RelationshipsSource", "relationships");
         topology.addProcessor("DeleteProducerByEventProcessor", DeleteProducerByEventProcessor::new, "RelationshipsSource");
         topology.addStateStore(Stores.keyValueStoreBuilder(
-                Stores.inMemoryKeyValueStore("queue-event-store"),      //todo store name
+                Stores.inMemoryKeyValueStore("queue-event-store3"),      //todo store name
                 Serdes.String(),
                 queueSerde),
                 "DeleteProducerByEventProcessor");
@@ -140,7 +140,7 @@ public class DozerApplication {
 
 
 
-        builder.addSource("Source", "processor-topic");     // todo topic name
+        builder.addSource("Source", "processor-topic3");     // todo topic name
 
             if (tickerTimeFlag)
                 builder.addProcessor("TickerProcessor", TickerProcessorTime::new, "Source");
@@ -152,20 +152,20 @@ public class DozerApplication {
 
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
-                Stores.inMemoryKeyValueStore("agent-store"),        //todo store name
+                Stores.inMemoryKeyValueStore("agent-store3"),        //todo store name
                 Serdes.String(),
                 agentSerde),
                 "TickerProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
-                Stores.inMemoryKeyValueStore("offset-store"),       //todo store name
+                Stores.inMemoryKeyValueStore("offset-store3"),       //todo store name
                 Serdes.String(),
                 longSerde),
                 "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "TickerProcessor");
 
             // todo topic name
-        builder.addSink("Sink", "processor-topic","TickerProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
+        builder.addSink("Sink", "processor-topic3","TickerProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
 
         final KafkaStreams streams = new KafkaStreams(builder, getProcessorProperties());

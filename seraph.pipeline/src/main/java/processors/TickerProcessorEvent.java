@@ -35,13 +35,13 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store");  // todo store name
+        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store3");  // todo store name
         this.timestampToSync_offsetToRead = new Long[2];
-        kvStore = (KeyValueStore) context.getStateStore("agent-store");         // todo store name
+        kvStore = (KeyValueStore) context.getStateStore("agent-store3");         // todo store name
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic", agent));     // todo topic name
+        kafkaProducer.send(new ProducerRecord<>("processor-topic3", agent));     // todo topic name
         kafkaProducer.flush();
         kafkaProducer.close();
     }

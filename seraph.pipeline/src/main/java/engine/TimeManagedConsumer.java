@@ -1,5 +1,6 @@
 package engine;
 
+import cdc_converter.CdcRecord;
 import config.KafkaConfigProperties;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -33,7 +34,7 @@ public class TimeManagedConsumer {
     public static Long delayedStream_seek(TopicPartition topicPartition, String outputTopic, Long timestampToSync, Long offsetToRead) {
 
         //todo differentiate Object: Neo4jObj if insertion, OutputObj if deletion
-        ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(Neo4jObj.class));
+        ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcRecord.class));
         Consumer<String, Object> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartition));
 
@@ -52,7 +53,10 @@ public class TimeManagedConsumer {
                         producer.send(new ProducerRecord<>(outputTopic, r.key(), r.value()));
                         offsetToRead = r.offset() + 1;
                     }
-                    else return offsetToRead;
+                    else {
+                        System.err.println("XXXXXXXXXXXXXXX - finito - XXXXXXXXXXXXXX");
+                        return offsetToRead;
+                    }
                 }
             }
         }

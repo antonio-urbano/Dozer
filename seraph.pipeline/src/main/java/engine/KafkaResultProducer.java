@@ -24,6 +24,7 @@ public class KafkaResultProducer {
      */
     public void producerResultRecord(String outputTopic, JSONObject cypherResult) {
         this.kafkaProducer.send(new ProducerRecord<>(outputTopic, cypherResult.toMap()));
+        this.kafkaProducer.flush();
     }
 
 }

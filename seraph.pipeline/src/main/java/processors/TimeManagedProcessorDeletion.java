@@ -27,12 +27,12 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store");  //todo store name
-        kvStore = (KeyValueStore) context.getStateStore("agent-store");         //todo store name
+        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store3");  //todo store name
+        kvStore = (KeyValueStore) context.getStateStore("agent-store3");         //todo store name
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic", agent));     //todo topic name
+        kafkaProducer.send(new ProducerRecord<>("processor-topic3", agent));     //todo topic name
         kafkaProducer.flush();
         kafkaProducer.close();
 
@@ -42,8 +42,8 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
     @Override
     public void process(String key, CurrentAgent currentAgent) {
         //todo handle "key", "value" and topicNames
-        if(currentAgent.getAgentName().equals(TickerProcessorEvent.class.getSimpleName())
-                || currentAgent.getAgentName().equals(TickerProcessorTime.class.getSimpleName())
+        if((currentAgent.getAgentName().equals(TickerProcessorEvent.class.getSimpleName())
+                || currentAgent.getAgentName().equals(TickerProcessorTime.class.getSimpleName()))
                 && currentAgent.getStatus().equals("completed")){
             Long offsetToRead = TimeManagedConsumer.delayedStream_seek
                     (new TopicPartition("tmpDeleteTopic", 0),
