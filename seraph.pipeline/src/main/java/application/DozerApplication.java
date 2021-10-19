@@ -17,7 +17,6 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.state.Stores;
-import org.apache.tinkerpop.gremlin.structure.T;
 import processors.*;
 
 import java.util.Properties;
