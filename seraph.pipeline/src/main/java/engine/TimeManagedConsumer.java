@@ -56,8 +56,8 @@ public class TimeManagedConsumer {
                     else return offsetToRead;
                 }
             }
-            else if(timestampToSync < System.currentTimeMillis())     //todo handle case
-                return offsetToRead;
+//            else if(timestampToSync < System.currentTimeMillis())     //todo handle case
+//                return offsetToRead;
         }
 
     }
