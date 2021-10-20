@@ -48,7 +48,7 @@ public class TimeManagedProcessorInsertion implements Processor<String, CurrentA
 
     @Override
     public void process(String key, CurrentAgent currentAgent) {
-        //todo handle "key", "value" and topicNames
+        //todo handle "key", "value"
         if(currentAgent.getAgentName().equals(TimeManagedProcessorDeletion.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
             Long offsetToRead = TimeManagedConsumer.delayedStream_seek

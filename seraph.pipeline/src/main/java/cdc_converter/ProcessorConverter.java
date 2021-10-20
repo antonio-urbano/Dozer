@@ -16,14 +16,12 @@ import java.util.Map;
 
 public class ProcessorConverter implements Processor<String, JsonPG> {
 
-    private KeyValueStore<String, Integer> kvStore;
     private ProcessorContext context;
     private Producer<String, CdcCreateRecord> kafkaProducer;
 
     @Override
     public void init(final ProcessorContext context) {
         this.context = context;
-//                kvStore = (KeyValueStore) context.getStateStore("agent-store3");     //todo store name
         this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
 
     }

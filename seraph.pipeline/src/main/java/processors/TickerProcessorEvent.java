@@ -55,7 +55,7 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
 
     @Override
     public void process(String key, CurrentAgent currentAgent) {
-        //todo handle "key", "value" and topicNames ("relationships" e "value-ticker-event")
+        //todo handle "key", "value"
         if (currentAgent.getAgentName().equals("SERAPH_QUERY_PARSED")
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),

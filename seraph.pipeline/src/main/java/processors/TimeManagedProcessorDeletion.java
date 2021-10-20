@@ -49,7 +49,7 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
 
     @Override
     public void process(String key, CurrentAgent currentAgent) {
-        //todo handle "key", "value" and topicNames
+        //todo handle "key", "value"
         if((currentAgent.getAgentName().equals(TickerProcessorEvent.class.getSimpleName())
                 || currentAgent.getAgentName().equals(TickerProcessorTime.class.getSimpleName()))
                 && currentAgent.getStatus().equals("completed")){

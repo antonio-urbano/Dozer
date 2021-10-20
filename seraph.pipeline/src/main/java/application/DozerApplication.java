@@ -102,7 +102,7 @@ public class DozerApplication {
         Serde<Queue> queueSerde = Serdes.serdeFrom(queueSer,
                 queueDeser);
 
-        topology.addSource("RelationshipsSource", "relationships");     //todo
+        topology.addSource("RelationshipsSource", DozerConfig.getCdcCreateRelationshipsTopic());
         topology.addProcessor("DeleteProducerByEventProcessor",
                 () -> new DeleteProducerByEventProcessor(eventRange, DozerConfig.getCdcDeleteRelationshipsTopic(), KEY_STORE),
                 "RelationshipsSource");
@@ -122,9 +122,6 @@ public class DozerApplication {
         }
 
         final RegisterQuery registerQuery = (RegisterQuery) DozerConfig.getSeraphQuery();
-
-        //todo flag
-        boolean deleteProdTimeFlag = registerQuery.getSeraphQuery().getWindow().getRange().isTimeRange();  //true = delete producer by time, false = delete producer by events
 
         JsonSerializer<CurrentAgent> agentJsonSerializer = new JsonSerializer<>();
         JsonDeserializer<CurrentAgent> agentJsonDeserializer = new JsonDeserializer<>(
@@ -195,7 +192,7 @@ public class DozerApplication {
                 Serdes.String().getClass().getName(), CurrentAgentSerde.class));
         final KafkaStreams streamsDeleteProducer;
 
-        if (deleteProdTimeFlag)
+        if (registerQuery.getSeraphQuery().getWindow().getRange().isTimeRange())
             streamsDeleteProducer = new KafkaStreams(builder_deleteRecordByTime.build(),
                     getStreamProperties(registerQuery.getQueryID() +"_dozer-delete-stream-time-app", DozerConfig.getKafkaBroker(),
                             Serdes.String().getClass().getName(), CdcSerde.class));
