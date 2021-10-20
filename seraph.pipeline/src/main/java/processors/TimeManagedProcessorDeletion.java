@@ -1,5 +1,6 @@
 package processors;
 
+import application.DozerConfig;
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
 import engine.TimeManagedConsumer;
@@ -22,17 +23,24 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
     private KeyValueStore<String, CurrentAgent> kvStore;
     private KeyValueStore<String, Long> offsetKvStore;
 
+    private final String agentStoreName;
+    private final String offsetStoreName;
+
+    public TimeManagedProcessorDeletion(String agentStoreName, String offsetStoreName) {
+        this.agentStoreName = agentStoreName;
+        this.offsetStoreName = offsetStoreName;
+    }
     
     @Override
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store3");  //todo store name
-        kvStore = (KeyValueStore) context.getStateStore("agent-store3");         //todo store name
+        offsetKvStore = (KeyValueStore) context.getStateStore(this.offsetStoreName);
+        kvStore = (KeyValueStore) context.getStateStore(this.agentStoreName);
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic3", agent));     //todo topic name
+        kafkaProducer.send(new ProducerRecord<>(DozerConfig.getWorkFlowTopic(), agent));
         kafkaProducer.flush();
         kafkaProducer.close();
 
@@ -46,8 +54,8 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
                 || currentAgent.getAgentName().equals(TickerProcessorTime.class.getSimpleName()))
                 && currentAgent.getStatus().equals("completed")){
             Long offsetToRead = TimeManagedConsumer.delayedStream_seek
-                    (new TopicPartition("tmpDeleteTopic", 0),
-                            "time-managed-topic", currentAgent.getTimestampToSync(), this.offsetKvStore.get("value-deletion"));
+                    (new TopicPartition(DozerConfig.getCdcDeleteRelationshipsTopic(), 0),
+                            DozerConfig.getNeo4jPluginRelationshipsTopic(), currentAgent.getTimestampToSync(), this.offsetKvStore.get("value-deletion"));
             this.offsetKvStore.put("value-deletion", offsetToRead);
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", currentAgent.getTimestampToSync());

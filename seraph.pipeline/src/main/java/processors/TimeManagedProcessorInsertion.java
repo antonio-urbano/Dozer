@@ -1,5 +1,6 @@
 package processors;
 
+import application.DozerConfig;
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
 import engine.TimeManagedConsumer;
@@ -22,17 +23,24 @@ public class TimeManagedProcessorInsertion implements Processor<String, CurrentA
     private KeyValueStore<String, CurrentAgent> kvStore;
     private KeyValueStore<String, Long> offsetKvStore;
 
-    
+    private final String agentStoreName;
+    private final String offsetStoreName;
+
+    public TimeManagedProcessorInsertion(String agentStoreName, String offsetStoreName) {
+        this.agentStoreName = agentStoreName;
+        this.offsetStoreName = offsetStoreName;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store3");      // todo store name
-        kvStore = (KeyValueStore) context.getStateStore("agent-store3");      // todo store name
+        offsetKvStore = (KeyValueStore) context.getStateStore(this.offsetStoreName);
+        kvStore = (KeyValueStore) context.getStateStore(this.agentStoreName);
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic3", agent));     //todo topic name
+        kafkaProducer.send(new ProducerRecord<>(DozerConfig.getWorkFlowTopic(), agent));
         kafkaProducer.flush();
         kafkaProducer.close();
     }
@@ -44,8 +52,8 @@ public class TimeManagedProcessorInsertion implements Processor<String, CurrentA
         if(currentAgent.getAgentName().equals(TimeManagedProcessorDeletion.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
             Long offsetToRead = TimeManagedConsumer.delayedStream_seek
-                    (new TopicPartition("relationships", 0),
-                            "time-managed-topic", currentAgent.getTimestampToSync(), this.offsetKvStore.get("value-insertion"));
+                    (new TopicPartition(DozerConfig.getCdcCreateRelationshipsTopic(), 0),
+                            DozerConfig.getNeo4jPluginRelationshipsTopic(), currentAgent.getTimestampToSync(), this.offsetKvStore.get("value-insertion"));
             this.offsetKvStore.put("value-insertion", offsetToRead);
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", currentAgent.getTimestampToSync());

@@ -1,24 +1,30 @@
 package engine;
 
+import application.DozerConfig;
 import org.json.JSONObject;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.internal.value.NodeValue;
 import org.neo4j.driver.internal.value.RelationshipValue;
 import org.neo4j.driver.util.Pair;
+import seraphGrammar.RegisterQuery;
 
 import java.util.List;
 
 public class CypherQueryHandler implements AutoCloseable{
 
     private Driver driver;
-    private String cypherQuery = "MATCH  (patient:Patient)-[t:TESTED_FOR {positive:true}]->(virus:Virus) RETURN DISTINCT patient.name, virus.name;";    //todo
-    private String kafkaTopic = "resulttopic2"; //todo
+    private final String cypherQuery;
+    private final String kafkaTopic;
 
 
     public CypherQueryHandler(String uri, String user, String password)
     {
         this.driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password));
+
+        RegisterQuery registerQuery = (RegisterQuery) DozerConfig.getSeraphQuery();
+        this.cypherQuery = registerQuery.getSeraphQuery().getCypherQuery();
+        this.kafkaTopic = registerQuery.getSeraphQuery().getOutputStream();
     }
 
     /**

@@ -1,6 +1,7 @@
 package config;
 
 
+import application.DozerConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -22,8 +23,8 @@ public class KafkaConfigProperties {
      */
     public static Properties getStreamsConfig() {
         Properties properties = new Properties();
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, "seraph-engine-app");
-        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, DozerConfig.getSeraphQuery().getQueryID() + "_seraph-engine-app");
+        properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, DozerConfig.getKafkaBroker());
         properties.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         return properties;
@@ -47,8 +48,8 @@ public class KafkaConfigProperties {
     public static Map<String, Object> getKafkaConsumerProperties(Class<?> deserializerClass) {
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "delayed-consumer");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, DozerConfig.getKafkaBroker());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, DozerConfig.getSeraphQuery().getQueryID() +"_delayed-consumer");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, deserializerClass);

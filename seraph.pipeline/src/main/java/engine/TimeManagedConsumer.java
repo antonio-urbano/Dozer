@@ -33,7 +33,6 @@ public class TimeManagedConsumer {
 
     public static Long delayedStream_seek(TopicPartition topicPartition, String outputTopic, Long timestampToSync, Long offsetToRead) {
 
-        //todo differentiate Object: CdcCreate if insertion, CdcDeleteRecord if deletion
         ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class));
         Consumer<String, Object> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartition));
@@ -56,8 +55,6 @@ public class TimeManagedConsumer {
                     else return offsetToRead;
                 }
             }
-//            else if(timestampToSync < System.currentTimeMillis())     //todo handle case
-//                return offsetToRead;
         }
 
     }

@@ -28,18 +28,6 @@ public class KubernetesClient {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        ApiClient client = Config.defaultClient();
-        Configuration.setDefaultApiClient(client);
-
-        CoreV1Api api = new CoreV1Api();
-
-        V1PodList list =
-                api.listNamespacedPod(
-                        NAMESPACE, null, null, null, null, null, null, null, null, null, null);
-        for (V1Pod item : list.getItems()) {
-            System.out.println(item.getMetadata().getName());
-        }
     }
 
     private static void createDeploy(Query query) throws IOException, ApiException {
@@ -48,7 +36,6 @@ public class KubernetesClient {
         Configuration.setDefaultApiClient(client);
 
         CoreV1Api api = new CoreV1Api();
-
         V1Pod pod2 =
                 new V1Pod()
                         .metadata(new V1ObjectMeta().name("ciao"))

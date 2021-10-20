@@ -1,9 +1,9 @@
 package processors;
 
+import application.DozerConfig;
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
 import engine.CypherQueryHandler;
-import engine.SeraphQueryParser;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -21,26 +21,32 @@ import org.apache.kafka.streams.state.KeyValueStore;
 public class TickerProcessorTime implements Processor<String, CurrentAgent> {
     private ProcessorContext context;
     private KeyValueStore<String, CurrentAgent> kvStore;
-    private long emitEveryTimeRange =120000L;   // todo time range value
+    private long emitEveryTimeRange;
+    private String agentStoreName;
+    private String offsetStoreName;
 
-
+    public TickerProcessorTime(long emitEveryTimeRange, String agentStoreName, String offsetStoreName) {
+        this.emitEveryTimeRange = emitEveryTimeRange;
+        this.agentStoreName = agentStoreName;
+        this.offsetStoreName = offsetStoreName;
+    }
 
     @Override
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        this.kvStore = (KeyValueStore) context.getStateStore("agent-store3"); //todo name state store
+        this.kvStore = (KeyValueStore) context.getStateStore(this.agentStoreName);
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic3", agent)); //todo topic name
+        kafkaProducer.send(new ProducerRecord<>(DozerConfig.getWorkFlowTopic(), agent));
         kafkaProducer.flush();
         kafkaProducer.close();
     }
 
     //todo "key"
     private void updateAgentKvStore(String key, CurrentAgent currentAgent) {
-        if (currentAgent.getAgentName().equals(SeraphQueryParser.class.getSimpleName())
+        if (currentAgent.getAgentName().equals("SERAPH_QUERY_PARSED")
         && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", currentAgent.getTimestampToSync());

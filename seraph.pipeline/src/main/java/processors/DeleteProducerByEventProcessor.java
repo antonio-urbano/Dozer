@@ -9,6 +9,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
+import seraphGrammar.EventRange;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -22,16 +23,25 @@ import java.util.Queue;
  */
 public class DeleteProducerByEventProcessor implements Processor<String, CdcCreateRecord> {
 
+    private final String keyStoreName;
+    private final String tmpDeleteTopic;
+    private final Long windowEventRange;
+
     private ProcessorContext context;
-    private final int windowEventRange = 3;       //todo
     private KeyValueStore<String, Queue<Object>> kvStore;
     private Queue<Object> eventQueue;
     Producer<String, Object> kafkaProducer;
 
+    public DeleteProducerByEventProcessor( EventRange eventRange, String tmpDeleteTopic, String keyStoreName) {
+        this.windowEventRange = eventRange.getSize();
+        this.keyStoreName = keyStoreName;
+        this.tmpDeleteTopic = tmpDeleteTopic;
+    }
+
     @Override
     public void init(ProcessorContext processorContext) {
         this.context = processorContext;
-        this.kvStore = (KeyValueStore) this.context.getStateStore("queue-event-store3");     //todo store name
+        this.kvStore = (KeyValueStore) this.context.getStateStore(this.keyStoreName);
         this.eventQueue = this.kvStore.get("key"); //todo key
         if (this.eventQueue ==null)
             this.eventQueue = new LinkedList<>();
@@ -49,7 +59,7 @@ public class DeleteProducerByEventProcessor implements Processor<String, CdcCrea
             eventQueue.add(cdcDeleteRecord);
 
         if(eventQueue.size()> windowEventRange){
-            kafkaProducer.send(new ProducerRecord<>("tmpDeleteTopic", eventQueue.remove()));    //todo tmpDeleteTopic
+            kafkaProducer.send(new ProducerRecord<>(this.tmpDeleteTopic, eventQueue.remove()));
             kafkaProducer.flush();
         }
         this.kvStore.put("key", eventQueue);

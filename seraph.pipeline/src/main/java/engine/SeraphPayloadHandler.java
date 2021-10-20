@@ -1,5 +1,6 @@
 package engine;
 
+import application.DozerConfig;
 import cdc_converter.CdcCreateRecord;
 import config.KafkaConfigProperties;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -17,33 +18,12 @@ import java.util.Collections;
 
 public class SeraphPayloadHandler {
 
-    final static String REGISTERED_QUERIES_TOPIC="registered-queries-topic";      // todo topic name
-
-
     //todo handle read first record when neo4j is not populated
-    public static Long getInitTimeToSync() {
-        ConsumerRecord<String, ?> relationshipRecord =consumeFirstRecord(CdcCreateRecord.class,new TopicPartition("relationships", 0));
+    public static Long getInitTimeToSync(String inputStream) {
+        ConsumerRecord<String, ?> relationshipRecord =consumeFirstRecord(CdcCreateRecord.class,new TopicPartition(inputStream, 0));
         if (relationshipRecord!=null)
             return relationshipRecord.timestamp();
         else return null;
-    }
-
-
-    public void writePayloadIntoKafka(SeraphPayload payload){
-        Producer<String, SeraphPayload> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.flush();
-        payload.setTimestampToSync(getInitTimeToSync());
-        kafkaProducer.send(new ProducerRecord<>(REGISTERED_QUERIES_TOPIC, payload));
-    }
-
-    public SeraphPayload readPayloadFromKafka(){
-        //todo handle which record to consume
-        //todo maybe last component can write somewhere last read payload
-        ConsumerRecord<String, ?> payloadRecord=consumeFirstRecord(SeraphPayload.class,new TopicPartition(REGISTERED_QUERIES_TOPIC, 0));
-        if (payloadRecord!=null)
-            return (SeraphPayload) payloadRecord.value();
-        else return null;
-
     }
 
     private static ConsumerRecord<String, ?> consumeFirstRecord(Class<?> classToConsume, TopicPartition topicPartitionToConsume){

@@ -1,9 +1,9 @@
 package processors;
 
+import application.DozerConfig;
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
 import engine.CypherQueryHandler;
-import engine.SeraphQueryParser;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -27,21 +27,27 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
     private KeyValueStore<String, CurrentAgent> kvStore;
     private KeyValueStore<String, Long> offsetKvStore;
     private Long[] timestampToSync_offsetToRead;
-    private Long emitEveryEventRange = 5L;        // todo event range value
+    private Long emitEveryEventRange;
+    private String agentStoreName;
+    private String offsetStoreName;
 
-
+    public TickerProcessorEvent(Long emitEveryEventRange, String agentStoreName, String offsetStoreName) {
+        this.emitEveryEventRange = emitEveryEventRange;
+        this.agentStoreName = agentStoreName;
+        this.offsetStoreName = offsetStoreName;
+    }
 
     @Override
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        offsetKvStore = (KeyValueStore) context.getStateStore("offset-store3");  // todo store name
+        offsetKvStore = (KeyValueStore) context.getStateStore(this.offsetStoreName);
         this.timestampToSync_offsetToRead = new Long[2];
-        kvStore = (KeyValueStore) context.getStateStore("agent-store3");         // todo store name
+        kvStore = (KeyValueStore) context.getStateStore(this.agentStoreName);
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic3", agent));     // todo topic name
+        kafkaProducer.send(new ProducerRecord<>(DozerConfig.getWorkFlowTopic(), agent));
         kafkaProducer.flush();
         kafkaProducer.close();
     }
@@ -50,7 +56,7 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
     @Override
     public void process(String key, CurrentAgent currentAgent) {
         //todo handle "key", "value" and topicNames ("relationships" e "value-ticker-event")
-        if (currentAgent.getAgentName().equals(SeraphQueryParser.class.getSimpleName())
+        if (currentAgent.getAgentName().equals("SERAPH_QUERY_PARSED")
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", currentAgent.getTimestampToSync());
@@ -62,7 +68,7 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
         if(currentAgent.getAgentName().equals(CypherHandlerProcessor.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
             this.timestampToSync_offsetToRead = TickerEventInputReader.readCreateEvent
-                    (new TopicPartition("relationships", 0),
+                    (new TopicPartition(DozerConfig.getCdcCreateRelationshipsTopic(), 0),
                             emitEveryEventRange, this.offsetKvStore.get("value-ticker-event"));
 
             Long timestampToSync = this.timestampToSync_offsetToRead[0];

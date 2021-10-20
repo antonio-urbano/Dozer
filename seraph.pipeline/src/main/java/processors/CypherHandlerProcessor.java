@@ -1,5 +1,6 @@
 package processors;
 
+import application.DozerConfig;
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
 import engine.CypherQueryHandler;
@@ -21,28 +22,32 @@ public class CypherHandlerProcessor implements Processor<String, CurrentAgent> {
     private CypherQueryHandler cypherHandler;
     private KeyValueStore<String, CurrentAgent> kvStore;
 
-    
+    private final String agentStoreName;
+
+    public CypherHandlerProcessor(String agentStoreName) {
+        this.agentStoreName = agentStoreName;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        kvStore = (KeyValueStore) context.getStateStore("agent-store3");     //todo store name
+        kvStore = (KeyValueStore) context.getStateStore(this.agentStoreName);
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("processor-topic3", agent));     // todo topic name
+        kafkaProducer.send(new ProducerRecord<>(DozerConfig.getWorkFlowTopic(), agent));
         kafkaProducer.flush();
         kafkaProducer.close();
 
-        //todo neo4j connection
-        this.cypherHandler = new CypherQueryHandler("bolt://localhost:7687", "neo4j", "sink");
+        this.cypherHandler = new CypherQueryHandler(DozerConfig.getNeo4jBolt(), DozerConfig.getNeo4jUsername(), DozerConfig.getNeo4jPassword());
 
     }
 
 
     @Override
     public void process(String key, CurrentAgent currentAgent) {
-        //todo handle "key" and topicNames
+        //todo handle "key"
         if(currentAgent.getAgentName().equals(TimeManagedProcessorInsertion.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),

@@ -1,5 +1,6 @@
 package cdc_converter;
 
+import application.DozerConfig;
 import config.KafkaConfigProperties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -18,8 +19,6 @@ public class ProcessorConverter implements Processor<String, JsonPG> {
     private KeyValueStore<String, Integer> kvStore;
     private ProcessorContext context;
     private Producer<String, CdcCreateRecord> kafkaProducer;
-    private final String outputTopic = "convertedTopic";
-
 
     @Override
     public void init(final ProcessorContext context) {
@@ -33,18 +32,18 @@ public class ProcessorConverter implements Processor<String, JsonPG> {
     public void process(String key, JsonPG pg) {
         Integer txEventsCount = pg.getNodes().size() + pg.getEdges().size();
         for (PgNode node:pg.getNodes()){//todo params meta
-            CdcCreateRecord cdcNode = new CdcCreateRecord(generateMeta("neo4j", node.getId(),
-                    pg.getNodes().indexOf(node), txEventsCount, "neo4j-source"),
+            CdcCreateRecord cdcNode = new CdcCreateRecord(generateMeta(DozerConfig.getNeo4jUsername(), node.getId(),
+                    pg.getNodes().indexOf(node), txEventsCount, DozerConfig.getNeo4jHostname()),
                     generateNodePayload(node), generateSchema(node));
-            kafkaProducer.send(new ProducerRecord<>("nodes", cdcNode));
+            kafkaProducer.send(new ProducerRecord<>(DozerConfig.getCdcCreateNodesTopic(), cdcNode));
             kafkaProducer.flush();
         }
         for (PgEdge edge:pg.getEdges()){//todo params meta
-            CdcCreateRecord cdcEdge = new CdcCreateRecord(generateMeta("neo4j", edge.getId(),
+            CdcCreateRecord cdcEdge = new CdcCreateRecord(generateMeta(DozerConfig.getNeo4jUsername(), edge.getId(),
                     pg.getEdges().indexOf(edge)+pg.getNodes().size(),
-                    txEventsCount, "neo4j-source"),
+                    txEventsCount, DozerConfig.getNeo4jHostname()),
                     generateRelationshipPayload(edge), generateSchema(edge));
-            kafkaProducer.send(new ProducerRecord<>("relationships", cdcEdge));
+            kafkaProducer.send(new ProducerRecord<>(DozerConfig.getCdcCreateRelationshipsTopic(), cdcEdge));
             kafkaProducer.flush();
         }
 
