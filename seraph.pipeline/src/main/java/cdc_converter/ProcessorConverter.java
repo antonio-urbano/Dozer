@@ -46,13 +46,13 @@ public class ProcessorConverter implements Processor<String, JsonPG> {
     }
 
     @Override
-    public void close() {}
+    public void close() { this.kafkaProducer.close(); }
 
 
     private Map generateMeta(String username, Integer txId, Integer txEventId, Integer txEventsCount,
                         String hostname){
         Map meta = new HashMap();
-        meta.put("timestamp", System.currentTimeMillis());
+        meta.put("timestamp", this.context.timestamp());
         meta.put("username", username);
         meta.put("txId", txId);
         meta.put("txEventId", txEventId);
