@@ -15,7 +15,7 @@ public class AAAjsonProducer {
         BufferedReader br = new BufferedReader(new FileReader("/home/antonio/Scrivania/personPgJson.json"));
         JsonPG pg = new Gson().fromJson(br, JsonPG.class);
         final Producer<String, JsonPG> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-        kafkaProducer.send(new ProducerRecord<>("JsonPG-topic", pg));
+        kafkaProducer.send(new ProducerRecord<>("eventtopic", pg));
         kafkaProducer.flush();
         kafkaProducer.close();
     }

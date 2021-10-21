@@ -1,13 +1,12 @@
 package cdc_converter;
 
-import application.DozerConfig;
+import config.DozerConfig;
 import config.KafkaConfigProperties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
-import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +22,6 @@ public class ProcessorConverter implements Processor<String, JsonPG> {
     public void init(final ProcessorContext context) {
         this.context = context;
         this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
-
     }
 
     @Override

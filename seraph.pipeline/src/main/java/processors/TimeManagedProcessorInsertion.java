@@ -1,6 +1,6 @@
 package processors;
 
-import application.DozerConfig;
+import config.DozerConfig;
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
 import engine.TimeManagedConsumer;
