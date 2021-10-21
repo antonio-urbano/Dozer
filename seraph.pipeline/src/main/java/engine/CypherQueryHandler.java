@@ -1,6 +1,6 @@
 package engine;
 
-import application.DozerConfig;
+import config.DozerConfig;
 import org.json.JSONObject;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;

@@ -1,6 +1,6 @@
 package processors;
 
-import application.DozerConfig;
+import config.DozerConfig;
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
 import engine.CypherQueryHandler;
@@ -17,7 +17,8 @@ import org.apache.kafka.streams.state.KeyValueStore;
  * Processor to handle the synchronization between all the processors in the topology according to the EVERY
  * operator defined in terms of number of events.
  * The processor initialize the timestampToSync, i.e. the timestamp to which all the components have to synchronize,
- * after the {@link SeraphQueryParser} ends to parse the seraph query.
+ * after the {//todo @link }
+ * ends to parse the seraph query.
  * Later, every time the {@link CypherQueryHandler} ends its process, it updates the timestampToSync by using
  * the {@link TickerEventInputReader} which takes care of the frequency of the evaluation process based on EVERY operator.
  */
@@ -27,9 +28,9 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
     private KeyValueStore<String, CurrentAgent> kvStore;
     private KeyValueStore<String, Long> offsetKvStore;
     private Long[] timestampToSync_offsetToRead;
-    private Long emitEveryEventRange;
-    private String agentStoreName;
-    private String offsetStoreName;
+    private final Long emitEveryEventRange;
+    private final String agentStoreName;
+    private final String offsetStoreName;
 
     public TickerProcessorEvent(Long emitEveryEventRange, String agentStoreName, String offsetStoreName) {
         this.emitEveryEventRange = emitEveryEventRange;

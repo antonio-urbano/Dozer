@@ -1,6 +1,6 @@
 package processors;
 
-import application.DozerConfig;
+import config.DozerConfig;
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
 import engine.CypherQueryHandler;
@@ -56,7 +56,8 @@ public class CypherHandlerProcessor implements Processor<String, CurrentAgent> {
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();
-        }    }
+        }
+    }
 
     @Override
     public void close() { }

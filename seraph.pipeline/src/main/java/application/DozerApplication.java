@@ -4,6 +4,7 @@ import cdc_converter.CdcDeleteRecord;
 import cdc_converter.CdcCreateRecord;
 import cdc_converter.JsonPG;
 import cdc_converter.ProcessorConverter;
+import config.DozerConfig;
 import config.KafkaConfigProperties;
 import custom_serdes.CdcSerde;
 import custom_serdes.CurrentAgentSerde;
@@ -21,12 +22,9 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.state.Stores;
-import org.springframework.web.client.support.RestGatewaySupport;
 import processors.*;
 import seraphGrammar.*;
-import seraphGrammar.SeraphQueryParser;
 
-import java.sql.Time;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
@@ -158,7 +156,7 @@ public class DozerApplication {
 
         if (registerQuery.getSeraphQuery().getReport().getRange().isTimeRange()) {
             TimeRange timeRange = (TimeRange) registerQuery.getSeraphQuery().getReport().getRange();
-            builder.addProcessor("TickerProcessor", () -> new TickerProcessorTime(timeRange.getDuration().toMillis(), AGENT_STORE, OFFSET_STORE), "Source");
+            builder.addProcessor("TickerProcessor", () -> new TickerProcessorTime(timeRange.getDuration().toMillis(), AGENT_STORE), "Source");
         }
         if (registerQuery.getSeraphQuery().getReport().getRange().isEventRange()) {
             EventRange eventRange = (EventRange) registerQuery.getSeraphQuery().getReport().getRange();
