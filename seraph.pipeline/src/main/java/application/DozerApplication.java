@@ -156,11 +156,17 @@ public class DozerApplication {
 
         if (registerQuery.getSeraphQuery().getReport().getRange().isTimeRange()) {
             TimeRange timeRange = (TimeRange) registerQuery.getSeraphQuery().getReport().getRange();
-            builder.addProcessor("TickerProcessor", () -> new TickerProcessorTime(timeRange.getDuration().toMillis(), AGENT_STORE), "Source");
+            builder.addProcessor("TickerProcessor", () -> new TickerProcessorTime(
+                    timeRange.getDuration().toMillis(), AGENT_STORE,
+                    registerQuery.getSeraphQuery().getInputStream()),
+                    "Source");
         }
         if (registerQuery.getSeraphQuery().getReport().getRange().isEventRange()) {
             EventRange eventRange = (EventRange) registerQuery.getSeraphQuery().getReport().getRange();
-            builder.addProcessor("TickerProcessor", () -> new TickerProcessorEvent(eventRange.getSize(), AGENT_STORE, OFFSET_STORE), "Source");
+            builder.addProcessor("TickerProcessor", () -> new TickerProcessorEvent(
+                    eventRange.getSize(), AGENT_STORE, OFFSET_STORE,
+                    registerQuery.getSeraphQuery().getInputStream()),
+                    "Source");
         }
 
 
@@ -208,7 +214,7 @@ public class DozerApplication {
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
         kafkaProducer.send(new ProducerRecord<>(DozerConfig.getWorkFlowTopic(),
                 new CurrentAgent("SERAPH_QUERY_PARSED",
-                        "completed", SeraphPayloadHandler.getInitTimeToSync(registerQuery.getSeraphQuery().getInputStream()))));
+                        "completed", 0L))); //todo move this in BullDozer
         kafkaProducer.flush();
         kafkaProducer.close();
 

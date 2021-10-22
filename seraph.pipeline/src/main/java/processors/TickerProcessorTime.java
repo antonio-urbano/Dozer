@@ -4,6 +4,7 @@ import config.DozerConfig;
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
 import engine.CypherQueryHandler;
+import engine.SeraphPayloadHandler;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -24,10 +25,12 @@ public class TickerProcessorTime implements Processor<String, CurrentAgent> {
     private KeyValueStore<String, CurrentAgent> kvStore;
     private final long emitEveryTimeRange;
     private final String agentStoreName;
+    private final String inputStream;
 
-    public TickerProcessorTime(long emitEveryTimeRange, String agentStoreName) {
+    public TickerProcessorTime(long emitEveryTimeRange, String agentStoreName, String inputStream) {
         this.emitEveryTimeRange = emitEveryTimeRange;
         this.agentStoreName = agentStoreName;
+        this.inputStream = inputStream;
     }
 
     @Override
@@ -48,7 +51,7 @@ public class TickerProcessorTime implements Processor<String, CurrentAgent> {
         if (currentAgent.getAgentName().equals("SERAPH_QUERY_PARSED")
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", currentAgent.getTimestampToSync());
+                    "completed", SeraphPayloadHandler.getInitTimeToSync(this.inputStream)); //todo handle empty stream
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();
@@ -57,7 +60,7 @@ public class TickerProcessorTime implements Processor<String, CurrentAgent> {
         else if(currentAgent.getAgentName().equals(CypherHandlerProcessor.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", currentAgent.getTimestampToSync() + emitEveryTimeRange);
+                    "completed", currentAgent.getTimestampToSync() + this.emitEveryTimeRange);
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();

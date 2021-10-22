@@ -4,6 +4,7 @@ import config.DozerConfig;
 import config.KafkaConfigProperties;
 import engine.CurrentAgent;
 import engine.CypherQueryHandler;
+import engine.SeraphPayloadHandler;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -31,11 +32,13 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
     private final Long emitEveryEventRange;
     private final String agentStoreName;
     private final String offsetStoreName;
+    private final String inputStream;
 
-    public TickerProcessorEvent(Long emitEveryEventRange, String agentStoreName, String offsetStoreName) {
+    public TickerProcessorEvent(Long emitEveryEventRange, String agentStoreName, String offsetStoreName, String inputStream) {
         this.emitEveryEventRange = emitEveryEventRange;
         this.agentStoreName = agentStoreName;
         this.offsetStoreName = offsetStoreName;
+        this.inputStream = inputStream;
     }
 
     @Override
@@ -60,7 +63,7 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
         if (currentAgent.getAgentName().equals("SERAPH_QUERY_PARSED")
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", currentAgent.getTimestampToSync());
+                    "completed", SeraphPayloadHandler.getInitTimeToSync(this.inputStream)); //todo handle empty stream
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();
