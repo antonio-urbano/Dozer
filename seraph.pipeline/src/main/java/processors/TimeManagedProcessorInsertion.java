@@ -58,8 +58,8 @@ public class TimeManagedProcessorInsertion implements Processor<String, CurrentA
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", currentAgent.getTimestampToSync());
             this.kvStore.put("key", updatedAgent);
-            context.forward("key",updatedAgent);
-            context.commit();
+            this.context.forward("key",updatedAgent);
+            this.context.commit();
         }
     }
 

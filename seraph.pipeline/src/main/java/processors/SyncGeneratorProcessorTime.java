@@ -51,7 +51,7 @@ public class SyncGeneratorProcessorTime implements Processor<String, CurrentAgen
         if (currentAgent.getAgentName().equals("SERAPH_QUERY_PARSED")
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", SeraphPayloadHandler.getInitTimeToSync(this.inputStream)); //todo handle empty stream
+                    "completed", SeraphPayloadHandler.getInitTimeToSync(this.inputStream)); //todo handle empty stream, Todo STARTING FROM
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();

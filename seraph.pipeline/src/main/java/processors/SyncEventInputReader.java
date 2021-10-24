@@ -27,10 +27,10 @@ aggiorna il timestamp_to_synch e l'offset_to_read
 public class SyncEventInputReader {
 
     /**
-     * Method called by the {@link SyncGeneratorProcessorEvent} to read from the input topic starting from the
-     * offsetToRead.
-     * Every time a new input record is read an internal counter is incremented and once the counter is equal
-     * to the emitEveryEventRange the methods returns both the updated offsetToRead and the timestamp associated
+     * Method called by the {@link SyncGeneratorProcessorEvent} to read from the CDC "create events" stream,
+     * starting from the offsetToRead.
+     * Every time a new record is read, an internal counter is incremented. Once the counter is equal
+     * to the emitEveryEventRange, the method returns both the updated offsetToRead and the timestamp associated
      * to the last consumed record
      * @param topicPartition associated to the input topic from which consume
      * @param emitEveryEventRange defines the frequency of the evaluation process

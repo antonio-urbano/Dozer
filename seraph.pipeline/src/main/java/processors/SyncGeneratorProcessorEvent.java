@@ -63,7 +63,7 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
         if (currentAgent.getAgentName().equals("SERAPH_QUERY_PARSED")
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", SeraphPayloadHandler.getInitTimeToSync(this.inputStream)); //todo handle empty stream
+                    "completed", SeraphPayloadHandler.getInitTimeToSync(this.inputStream)); //todo handle empty stream, Todo STARTING FROM
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();
@@ -73,7 +73,7 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
                 && currentAgent.getStatus().equals("completed")){
             this.timestampToSync_offsetToRead = SyncEventInputReader.readCreateEvent
                     (new TopicPartition(DozerConfig.getCdcCreateRelationshipsTopic(), 0),
-                            emitEveryEventRange, this.offsetKvStore.get("value-sync-generator-event"));
+                            this.emitEveryEventRange, this.offsetKvStore.get("value-sync-generator-event"));
 
             Long timestampToSync = this.timestampToSync_offsetToRead[0];
             Long offsetToRead = this.timestampToSync_offsetToRead[1];
@@ -82,8 +82,8 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", timestampToSync);
             this.kvStore.put("key", updatedAgent);
-            context.forward("key",updatedAgent);
-            context.commit();
+            this.context.forward("key",updatedAgent);
+            this.context.commit();
         }
     }
 
