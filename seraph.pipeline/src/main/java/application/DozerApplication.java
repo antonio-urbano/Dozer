@@ -50,16 +50,16 @@ public class DozerApplication {
         JsonSerializer<JsonPG> PGJsonSerializer = new JsonSerializer<>();
         JsonDeserializer<JsonPG> PGJsonDeserializer = new JsonDeserializer<>(
                 JsonPG.class);
-        Serde<JsonPG> jsonSerde = Serdes.serdeFrom(PGJsonSerializer,
+        Serde<JsonPG> jsonPGSerde = Serdes.serdeFrom(PGJsonSerializer,
                 PGJsonDeserializer);
 
         KStream<String, JsonPG> stream = builder.stream(inputStream,
-                Consumed.with(Serdes.String(), jsonSerde));
+                Consumed.with(Serdes.String(), jsonPGSerde));
         stream.process(ProcessorConverter::new);
     }
 
 
-    static void produceDeleteRecordByTime(final StreamsBuilder builder, Long emit_time_range) {
+    static void produceDeleteRecordByTime(final StreamsBuilder builder, Long windowTimeRange) {
 
 
         JsonSerializer<CdcCreateRecord> cdcCreateSerializer = new JsonSerializer<>();
@@ -79,12 +79,12 @@ public class DozerApplication {
 
         KStream<String, CdcDeleteRecord> stream = builder.stream(DozerConfig.getCdcCreateRelationshipsTopic(),
                         Consumed.with(Serdes.String(), cdcCreateSerde).
-                                withTimestampExtractor(new CustomerExtractor(emit_time_range)))
+                                withTimestampExtractor(new CustomerExtractor(windowTimeRange)))
                 .filter((_key, cdcCreateRecord) -> cdcCreateRecord != null)
                 .filter((_key, cdcCreateRecord) -> cdcCreateRecord.getPayload() != null)
                 .filter((_key, cdcCreateRecord) -> cdcCreateRecord.getMeta().get("operation").equals("created"))
                 .filter((_key, cdcCreateRecord) -> cdcCreateRecord.getPayload().get("start") != null)
-                .map((k, cdcCreateRecord) -> new KeyValue<>(k, new CdcDeleteRecord(cdcCreateRecord, emit_time_range)));
+                .map((k, cdcCreateRecord) -> new KeyValue<>(k, new CdcDeleteRecord(cdcCreateRecord, windowTimeRange)));
 
         stream.to(DozerConfig.getCdcDeleteRelationshipsTopic(), Produced.with(stringSerde, cdcDeleteSerde));
 
@@ -156,14 +156,14 @@ public class DozerApplication {
 
         if (registerQuery.getSeraphQuery().getReport().getRange().isTimeRange()) {
             TimeRange timeRange = (TimeRange) registerQuery.getSeraphQuery().getReport().getRange();
-            builder.addProcessor("TickerProcessor", () -> new TickerProcessorTime(
+            builder.addProcessor("SyncGeneratorProcessor", () -> new SyncGeneratorProcessorTime(
                     timeRange.getDuration().toMillis(), AGENT_STORE,
                     registerQuery.getSeraphQuery().getInputStream()),
                     "Source");
         }
         if (registerQuery.getSeraphQuery().getReport().getRange().isEventRange()) {
             EventRange eventRange = (EventRange) registerQuery.getSeraphQuery().getReport().getRange();
-            builder.addProcessor("TickerProcessor", () -> new TickerProcessorEvent(
+            builder.addProcessor("SyncGeneratorProcessor", () -> new SyncGeneratorProcessorEvent(
                     eventRange.getSize(), AGENT_STORE, OFFSET_STORE,
                     registerQuery.getSeraphQuery().getInputStream()),
                     "Source");
@@ -179,19 +179,19 @@ public class DozerApplication {
                         Stores.inMemoryKeyValueStore(AGENT_STORE),
                         Serdes.String(),
                         agentSerde),
-                "TickerProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
+                "SyncGeneratorProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
 
         builder.addStateStore(Stores.keyValueStoreBuilder(
                         Stores.inMemoryKeyValueStore(OFFSET_STORE),
                         Serdes.String(),
                         longSerde),
-                "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "TickerProcessor");
+                "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "SyncGeneratorProcessor");
 
-        builder.addSink("Sink", DozerConfig.getWorkFlowTopic(), "TickerProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
+        builder.addSink("Sink", DozerConfig.getWorkFlowTopic(), "SyncGeneratorProcessor", "TimeManagedProcessorDeletion", "TimeManagedProcessorInsertion", "CypherHandlerProcessor");
 
         final CountDownLatch latch = new CountDownLatch(3);
-        final KafkaStreams streams = new KafkaStreams(builder, getStreamProperties(
+        final KafkaStreams currentAgentStreams = new KafkaStreams(builder, getStreamProperties(
                 registerQuery.getQueryID() + "_dozer-processors-app", DozerConfig.getKafkaBroker(),
                 Serdes.String().getClass().getName(), CurrentAgentSerde.class));
         final KafkaStreams streamsDeleteProducer;
@@ -219,11 +219,11 @@ public class DozerApplication {
         kafkaProducer.close();
 
         // attach shutdown handler to catch control-c
-        Runtime.getRuntime().addShutdownHook(new Thread(registerQuery.getQueryID() +"_dozer-streams-shutdown-hook") {
+        Runtime.getRuntime().addShutdownHook(new Thread(registerQuery.getQueryID() +"_dozer-currentAgentStreams-shutdown-hook") {
             @Override
             public void run() {
                 streamsConverter.close();
-                streams.close();
+                currentAgentStreams.close();
                 streamsDeleteProducer.close();
                 latch.countDown();
             }
@@ -231,7 +231,7 @@ public class DozerApplication {
 
         try {
             streamsConverter.start();
-            streams.start();
+            currentAgentStreams.start();
             streamsDeleteProducer.start();
             latch.await();
         } catch (final Throwable e) {

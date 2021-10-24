@@ -8,36 +8,28 @@ import engine.SeraphPayloadHandler;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 
-
 /**
  * Processor to handle the synchronization between all the processors in the topology according to the EVERY
- * operator defined in terms of number of events.
+ * operator defined in terms of time expressed as Milliseconds.
  * The processor initialize the timestampToSync, i.e. the timestamp to which all the components have to synchronize,
- * after the {//todo @link }
+ * after the {//todo change the link for Parser}
  * ends to parse the seraph query.
- * Later, every time the {@link CypherQueryHandler} ends its process, it updates the timestampToSync by using
- * the {@link TickerEventInputReader} which takes care of the frequency of the evaluation process based on EVERY operator.
+ * Later, every time the {@link CypherQueryHandler} ends its process, it updates the timestampToSync
  */
-public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
-
+public class SyncGeneratorProcessorTime implements Processor<String, CurrentAgent> {
     private ProcessorContext context;
     private KeyValueStore<String, CurrentAgent> kvStore;
-    private KeyValueStore<String, Long> offsetKvStore;
-    private Long[] timestampToSync_offsetToRead;
-    private final Long emitEveryEventRange;
+    private final long emitEveryTimeRange;
     private final String agentStoreName;
-    private final String offsetStoreName;
     private final String inputStream;
 
-    public TickerProcessorEvent(Long emitEveryEventRange, String agentStoreName, String offsetStoreName, String inputStream) {
-        this.emitEveryEventRange = emitEveryEventRange;
+    public SyncGeneratorProcessorTime(long emitEveryTimeRange, String agentStoreName, String inputStream) {
+        this.emitEveryTimeRange = emitEveryTimeRange;
         this.agentStoreName = agentStoreName;
-        this.offsetStoreName = offsetStoreName;
         this.inputStream = inputStream;
     }
 
@@ -45,9 +37,7 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         this.context = context;
-        offsetKvStore = (KeyValueStore) context.getStateStore(this.offsetStoreName);
-        this.timestampToSync_offsetToRead = new Long[2];
-        kvStore = (KeyValueStore) context.getStateStore(this.agentStoreName);
+        this.kvStore = (KeyValueStore) context.getStateStore(this.agentStoreName);
         CurrentAgent agent = new CurrentAgent(this.getClass().getSimpleName(),
                 "started", 0L);
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
@@ -56,10 +46,8 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
         kafkaProducer.close();
     }
 
-
     @Override
-    public void process(String key, CurrentAgent currentAgent) {
-        //todo handle "key", "value"
+    public void process(String key, CurrentAgent currentAgent) { //todo key
         if (currentAgent.getAgentName().equals("SERAPH_QUERY_PARSED")
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
@@ -69,21 +57,13 @@ public class TickerProcessorEvent implements Processor<String, CurrentAgent> {
             this.context.commit();
 
         }
-        if(currentAgent.getAgentName().equals(CypherHandlerProcessor.class.getSimpleName())
+        else if(currentAgent.getAgentName().equals(CypherHandlerProcessor.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
-            this.timestampToSync_offsetToRead = TickerEventInputReader.readCreateEvent
-                    (new TopicPartition(DozerConfig.getCdcCreateRelationshipsTopic(), 0),
-                            emitEveryEventRange, this.offsetKvStore.get("value-ticker-event"));
-
-            Long timestampToSync = this.timestampToSync_offsetToRead[0];
-            Long offsetToRead = this.timestampToSync_offsetToRead[1];
-
-            this.offsetKvStore.put("value-ticker-event", offsetToRead);
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", timestampToSync);
+                    "completed", currentAgent.getTimestampToSync() + this.emitEveryTimeRange);
             this.kvStore.put("key", updatedAgent);
-            context.forward("key",updatedAgent);
-            context.commit();
+            this.context.forward("key", updatedAgent);
+            this.context.commit();
         }
     }
 

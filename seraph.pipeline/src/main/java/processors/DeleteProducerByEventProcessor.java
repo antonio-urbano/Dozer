@@ -56,18 +56,18 @@ public class DeleteProducerByEventProcessor implements Processor<String, CdcCrea
                 && cdcCreateRecord.getPayload().get("start")!=null)
             cdcDeleteRecord = new CdcDeleteRecord(cdcCreateRecord, 0L);
         if (cdcDeleteRecord !=null)
-            eventQueue.add(cdcDeleteRecord);
+            this.eventQueue.add(cdcDeleteRecord);
 
-        if(eventQueue.size()> windowEventRange){
-            kafkaProducer.send(new ProducerRecord<>(this.tmpDeleteTopic, eventQueue.remove()));
-            kafkaProducer.flush();
+        if(this.eventQueue.size()> this.windowEventRange){
+            this.kafkaProducer.send(new ProducerRecord<>(this.tmpDeleteTopic, this.eventQueue.remove()));
+            this.kafkaProducer.flush();
         }
-        this.kvStore.put("key", eventQueue);
+        this.kvStore.put("key", this.eventQueue);
         this.context.commit();
     }
 
     @Override
     public void close() {
-
+        this.kafkaProducer.close();
     }
 }

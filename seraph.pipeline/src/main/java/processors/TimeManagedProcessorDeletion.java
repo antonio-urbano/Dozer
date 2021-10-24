@@ -15,7 +15,7 @@ import org.apache.kafka.streams.state.KeyValueStore;
 /**
  * Processor to handle the consumption of the deletion records in CDC format
  * at proper time by using the {@link TimeManagedConsumer}.
- * It corresponds to the first processor triggered after the TickerProcessor ends its process.
+ * It corresponds to the first processor triggered after the SyncGeneratorProcessor ends its process.
  */
 public class TimeManagedProcessorDeletion implements Processor<String, CurrentAgent> {
 
@@ -50,8 +50,8 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
     @Override
     public void process(String key, CurrentAgent currentAgent) {
         //todo handle "key", "value"
-        if((currentAgent.getAgentName().equals(TickerProcessorEvent.class.getSimpleName())
-                || currentAgent.getAgentName().equals(TickerProcessorTime.class.getSimpleName()))
+        if((currentAgent.getAgentName().equals(SyncGeneratorProcessorEvent.class.getSimpleName())
+                || currentAgent.getAgentName().equals(SyncGeneratorProcessorTime.class.getSimpleName()))
                 && currentAgent.getStatus().equals("completed")){
             Long offsetToRead = TimeManagedConsumer.delayedStream_seek
                     (new TopicPartition(DozerConfig.getCdcDeleteRelationshipsTopic(), 0),

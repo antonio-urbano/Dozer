@@ -5,9 +5,6 @@ import config.KafkaConfigProperties;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -16,7 +13,7 @@ import java.time.Duration;
 import java.util.Collections;
 
 /**
- * This class is used by the {@link TickerProcessorEvent} to handle the timestampToSync, i.e.
+ * This class is used by the {@link SyncGeneratorProcessorEvent} to handle the timestampToSync, i.e.
  * the timestamp to which all the components have to synchronize, in the case in which
  * the EVERY operator is defined in terms of number of events.
  */
@@ -27,10 +24,10 @@ Ha un contatore interno, quando raggiunge il treshold (window_event_range)
 aggiorna il timestamp_to_synch e l'offset_to_read
  */
 
-public class TickerEventInputReader {
+public class SyncEventInputReader {
 
     /**
-     * Method called by the {@link TickerProcessorEvent} to read from the input topic starting from the
+     * Method called by the {@link SyncGeneratorProcessorEvent} to read from the input topic starting from the
      * offsetToRead.
      * Every time a new input record is read an internal counter is incremented and once the counter is equal
      * to the emitEveryEventRange the methods returns both the updated offsetToRead and the timestamp associated
