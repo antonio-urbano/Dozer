@@ -25,7 +25,7 @@ public class KafkaConfigProperties {
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, DozerConfig.getSeraphQuery().getQueryID() + "_seraph-engine-app");
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, DozerConfig.getKafkaBroker());
         properties.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+//        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");      //todo
         return properties;
     }
 

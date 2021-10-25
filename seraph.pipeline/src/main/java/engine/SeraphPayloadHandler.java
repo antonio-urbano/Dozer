@@ -41,7 +41,7 @@ public class SeraphPayloadHandler {
         Consumer<String, ?> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartitionToConsume));
 
-        consumer.seek(topicPartitionToConsume, consumer.endOffsets(Collections.singletonList(topicPartitionToConsume)).get(topicPartitionToConsume));
+        consumer.seek(topicPartitionToConsume, consumer.endOffsets(Collections.singletonList(topicPartitionToConsume)).get(topicPartitionToConsume)-1);
         ConsumerRecords<String, ?> records = consumer.poll(Duration.ofMillis(100));
         if(!records.isEmpty())
             return records.records(topicPartitionToConsume).get(0);

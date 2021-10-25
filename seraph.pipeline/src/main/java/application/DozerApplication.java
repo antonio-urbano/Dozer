@@ -157,18 +157,19 @@ public class DozerApplication {
         final String AGENT_STORE = registerQuery.getQueryID() + "agent-store";
         final String OFFSET_STORE = registerQuery.getQueryID() + "offset-store";
 
+        //todo initialization time to sync from inputStream or from CDC
         if (seraphRegisteredQuery.getReport().getRange().isTimeRange()) {
             TimeRange timeRange = (TimeRange) seraphRegisteredQuery.getReport().getRange();
             builder.addProcessor("SyncGeneratorProcessor", () -> new SyncGeneratorProcessorTime(
                     timeRange.getDuration().toMillis(), AGENT_STORE,
-                            seraphRegisteredQuery.getInputStream(), seraphRegisteredQuery.getWindow().getStart()),
+                            DozerConfig.getCdcCreateRelationshipsTopic(), seraphRegisteredQuery.getWindow().getStart()),
                     "Source");
         }
         if (seraphRegisteredQuery.getReport().getRange().isEventRange()) {
             EventRange eventRange = (EventRange) seraphRegisteredQuery.getReport().getRange();
             builder.addProcessor("SyncGeneratorProcessor", () -> new SyncGeneratorProcessorEvent(
                     eventRange.getSize(), AGENT_STORE, OFFSET_STORE,
-                            seraphRegisteredQuery.getInputStream(), seraphRegisteredQuery.getWindow().getStart()),
+                            DozerConfig.getCdcCreateRelationshipsTopic(), seraphRegisteredQuery.getWindow().getStart()),
                     "Source");
         }
 
