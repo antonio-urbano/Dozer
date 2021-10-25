@@ -114,12 +114,15 @@ public class DozerApplication {
 
 
     public static void main(final String[] args) throws Exception {
+        final RegisterQuery registerQuery = (RegisterQuery) DozerConfig.getSeraphQuery();
+        final SeraphQuery seraphRegisteredQuery;
 
-        if (DozerConfig.getSeraphQuery().getQueryType() == QueryType.UNREGISTER) {
+        if (registerQuery.getQueryType() == QueryType.UNREGISTER) {
             throw new Exception("Got an UNREGISTER QUERY");
         }
+        else seraphRegisteredQuery =  registerQuery.getSeraphQuery();
 
-        final RegisterQuery registerQuery = (RegisterQuery) DozerConfig.getSeraphQuery();
+
 
         JsonSerializer<CurrentAgent> agentJsonSerializer = new JsonSerializer<>();
         JsonDeserializer<CurrentAgent> agentJsonDeserializer = new JsonDeserializer<>(
@@ -133,15 +136,15 @@ public class DozerApplication {
         final StreamsBuilder builder_deleteRecordByTime = new StreamsBuilder();
         final Topology deleteByEvent_topology = new Topology();
 
-        if (registerQuery.getSeraphQuery().getWindow().getRange().isTimeRange()) {
-            TimeRange timeRange = (TimeRange) registerQuery.getSeraphQuery().getWindow().getRange();
+        if (seraphRegisteredQuery.getWindow().getRange().isTimeRange()) {
+            TimeRange timeRange = (TimeRange) seraphRegisteredQuery.getWindow().getRange();
             produceDeleteRecordByTime(
                     builder_deleteRecordByTime,
                     timeRange.getDuration().toMillis()
                     );
         }
-        if (registerQuery.getSeraphQuery().getWindow().getRange().isEventRange()) {
-            EventRange eventRange = (EventRange) registerQuery.getSeraphQuery().getWindow().getRange();
+        if (seraphRegisteredQuery.getWindow().getRange().isEventRange()) {
+            EventRange eventRange = (EventRange) seraphRegisteredQuery.getWindow().getRange();
             produceDeleteRecordByEvent(
                     deleteByEvent_topology,
                     registerQuery.getQueryID(),
@@ -154,18 +157,18 @@ public class DozerApplication {
         final String AGENT_STORE = registerQuery.getQueryID() + "agent-store";
         final String OFFSET_STORE = registerQuery.getQueryID() + "offset-store";
 
-        if (registerQuery.getSeraphQuery().getReport().getRange().isTimeRange()) {
-            TimeRange timeRange = (TimeRange) registerQuery.getSeraphQuery().getReport().getRange();
+        if (seraphRegisteredQuery.getReport().getRange().isTimeRange()) {
+            TimeRange timeRange = (TimeRange) seraphRegisteredQuery.getReport().getRange();
             builder.addProcessor("SyncGeneratorProcessor", () -> new SyncGeneratorProcessorTime(
                     timeRange.getDuration().toMillis(), AGENT_STORE,
-                    registerQuery.getSeraphQuery().getInputStream()),
+                            seraphRegisteredQuery.getInputStream(), seraphRegisteredQuery.getWindow().getStart()),
                     "Source");
         }
-        if (registerQuery.getSeraphQuery().getReport().getRange().isEventRange()) {
-            EventRange eventRange = (EventRange) registerQuery.getSeraphQuery().getReport().getRange();
+        if (seraphRegisteredQuery.getReport().getRange().isEventRange()) {
+            EventRange eventRange = (EventRange) seraphRegisteredQuery.getReport().getRange();
             builder.addProcessor("SyncGeneratorProcessor", () -> new SyncGeneratorProcessorEvent(
                     eventRange.getSize(), AGENT_STORE, OFFSET_STORE,
-                    registerQuery.getSeraphQuery().getInputStream()),
+                            seraphRegisteredQuery.getInputStream(), seraphRegisteredQuery.getWindow().getStart()),
                     "Source");
         }
 
@@ -196,7 +199,7 @@ public class DozerApplication {
                 Serdes.String().getClass().getName(), CurrentAgentSerde.class));
         final KafkaStreams streamsDeleteProducer;
 
-        if (registerQuery.getSeraphQuery().getWindow().getRange().isTimeRange())
+        if (seraphRegisteredQuery.getWindow().getRange().isTimeRange())
             streamsDeleteProducer = new KafkaStreams(builder_deleteRecordByTime.build(),
                     getStreamProperties(registerQuery.getQueryID() +"_dozer-delete-stream-time-app", DozerConfig.getKafkaBroker(),
                             Serdes.String().getClass().getName(), CdcSerde.class));
@@ -206,7 +209,7 @@ public class DozerApplication {
                             Serdes.String().getClass().getName(), CdcSerde.class));
 
         final StreamsBuilder converterBuilder = new StreamsBuilder();
-        convertPgToCDC(converterBuilder, registerQuery.getSeraphQuery().getInputStream());
+        convertPgToCDC(converterBuilder, seraphRegisteredQuery.getInputStream());
         final KafkaStreams streamsConverter = new KafkaStreams(converterBuilder.build(),
                 getStreamProperties(registerQuery.getQueryID() +"_dozer-converter-processors-app", DozerConfig.getKafkaBroker(),
                         Serdes.String().getClass().getName(), CdcSerde.class));

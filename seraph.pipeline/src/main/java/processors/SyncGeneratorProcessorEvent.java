@@ -12,6 +12,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
+import seraphGrammar.Start;
 
 
 /**
@@ -33,12 +34,15 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
     private final String agentStoreName;
     private final String offsetStoreName;
     private final String inputStream;
+    private final Start windowStart;
 
-    public SyncGeneratorProcessorEvent(Long emitEveryEventRange, String agentStoreName, String offsetStoreName, String inputStream) {
+    public SyncGeneratorProcessorEvent(Long emitEveryEventRange, String agentStoreName,
+                                       String offsetStoreName, String inputStream, Start windowStart) {
         this.emitEveryEventRange = emitEveryEventRange;
         this.agentStoreName = agentStoreName;
         this.offsetStoreName = offsetStoreName;
         this.inputStream = inputStream;
+        this.windowStart = windowStart;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
         if (currentAgent.getAgentName().equals("SERAPH_QUERY_PARSED")
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", SeraphPayloadHandler.getInitTimeToSync(this.inputStream)); //todo handle empty stream, Todo STARTING FROM
+                    "completed", SeraphPayloadHandler.getInitTimeToSync(this.inputStream, this.windowStart)); //todo handle empty stream, Todo STARTING FROM
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();
