@@ -45,7 +45,7 @@ public class DeleteProducerByEventProcessor implements Processor<String, CdcCrea
         this.eventQueue = this.kvStore.get("key"); //todo key
         if (this.eventQueue ==null)
             this.eventQueue = new LinkedList<>();
-        this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
+        this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties(this.getClass().getSimpleName()));
     }
 
     @Override

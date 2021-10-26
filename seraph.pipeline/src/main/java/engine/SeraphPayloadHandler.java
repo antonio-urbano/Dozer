@@ -1,13 +1,17 @@
 package engine;
 
 import cdc_converter.CdcCreateRecord;
+import config.DozerConfig;
 import config.KafkaConfigProperties;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import seraphGrammar.Event;
 import seraphGrammar.EventStart;
 import seraphGrammar.Start;
@@ -15,6 +19,8 @@ import seraphGrammar.TimeStart;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SeraphPayloadHandler {
 
@@ -26,7 +32,7 @@ public class SeraphPayloadHandler {
             if (event.equals(Event.Earliest))
                 relationshipRecord = consumeFirstRecord(CdcCreateRecord.class,new TopicPartition(inputStream, 0));
             else if (event.equals(Event.Latest))
-                relationshipRecord = consumeLastRecord(CdcCreateRecord.class,new TopicPartition(inputStream, 0));
+                return System.currentTimeMillis();//relationshipRecord = consumeLastRecord(CdcCreateRecord.class,new TopicPartition(inputStream, 0));
 
             if (relationshipRecord!=null)
                 return relationshipRecord.timestamp();
@@ -36,8 +42,20 @@ public class SeraphPayloadHandler {
             return ((TimeStart) windowStart).getInstant().toEpochMilli();
     }
 
+    public static Map<String, Object> getKafkaConsumerProperties(Class<?> deserializerClass) {
+        Map<String, Object> props = new HashMap<>();
+
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, DozerConfig.getKafkaBroker());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, DozerConfig.getSeraphQuery().getQueryID() + "_timeToSyncInitializer");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, deserializerClass);
+
+        return props;
+    }
+
     private static ConsumerRecord<String,?> consumeLastRecord(Class<?> classToConsume, TopicPartition topicPartitionToConsume){
-        ConsumerFactory<String, ?> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(classToConsume));
+        ConsumerFactory<String, ?> cf = new DefaultKafkaConsumerFactory<>(getKafkaConsumerProperties(classToConsume));
         Consumer<String, ?> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartitionToConsume));
 
@@ -49,7 +67,7 @@ public class SeraphPayloadHandler {
     }
 
     private static ConsumerRecord<String, ?> consumeFirstRecord(Class<?> classToConsume, TopicPartition topicPartitionToConsume){
-        ConsumerFactory<String, ?> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(classToConsume));
+        ConsumerFactory<String, ?> cf = new DefaultKafkaConsumerFactory<>(getKafkaConsumerProperties(classToConsume));
         Consumer<String, ?> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartitionToConsume));
 

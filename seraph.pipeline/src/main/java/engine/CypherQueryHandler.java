@@ -56,7 +56,7 @@ public class CypherQueryHandler implements AutoCloseable{
      * Write the result record into kafka
      */
     public void cypherResultIntoKafka(){
-        KafkaResultProducer kafkaResultProducer = new KafkaResultProducer();
+        KafkaResultProducer kafkaResultProducer = new KafkaResultProducer(this.getClass().getSimpleName());
         JSONObject jsonQueryResult = runQuery();
         if (jsonQueryResult==null)
             System.err.println("Null query result");        //todo null query result

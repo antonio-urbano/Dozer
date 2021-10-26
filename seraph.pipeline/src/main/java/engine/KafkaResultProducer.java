@@ -13,8 +13,8 @@ public class KafkaResultProducer {
 
     private final Producer<String, Map<String,Object>> kafkaProducer;
 
-    public KafkaResultProducer(){
-        this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
+    public KafkaResultProducer(String applicationId){
+        this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties(applicationId));
     }
 
     /**

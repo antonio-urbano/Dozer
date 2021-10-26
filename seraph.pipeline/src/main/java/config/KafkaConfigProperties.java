@@ -20,9 +20,9 @@ public class KafkaConfigProperties {
     /**
      * @return the properties associated to the streams config {@link StreamsConfig}
      */
-    public static Properties getStreamsConfig() {
+    public static Properties getStreamsConfig(String applicationId) {
         Properties properties = new Properties();
-        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, DozerConfig.getSeraphQuery().getQueryID() + "_seraph-engine-app");
+        properties.put(StreamsConfig.APPLICATION_ID_CONFIG, DozerConfig.getSeraphQuery().getQueryID() + "_"+applicationId);
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, DozerConfig.getKafkaBroker());
         properties.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
 //        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");      //todo
@@ -32,8 +32,8 @@ public class KafkaConfigProperties {
     /**
      * @return the kafka producer configs {@link ProducerConfig}
      */
-    public static Properties getKafkaProducerProperties() {
-        Properties properties = getStreamsConfig();
+    public static Properties getKafkaProducerProperties(String applicationId) {
+        Properties properties = getStreamsConfig(applicationId);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
         return properties;

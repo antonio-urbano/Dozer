@@ -32,7 +32,8 @@ import java.util.concurrent.CountDownLatch;
 //todo javadoc
 public class DozerApplication {
 
-    static Properties getStreamProperties(String applicationId, String bootstrapServer, String keySerde, Class<?> valueSerde) {
+    static Properties getStreamProperties(String applicationId, String bootstrapServer,
+                                          String keySerde, Class<?> valueSerde, String offset) {
         Properties props = new Properties();
 
         props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, applicationId); //todo
@@ -40,7 +41,7 @@ public class DozerApplication {
         props.putIfAbsent(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
         props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, keySerde);
         props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, valueSerde);
-        props.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offset);
 
         return props;
     }
@@ -197,25 +198,30 @@ public class DozerApplication {
         final CountDownLatch latch = new CountDownLatch(3);
         final KafkaStreams currentAgentStreams = new KafkaStreams(builder, getStreamProperties(
                 registerQuery.getQueryID() + "_dozer-processors-app", DozerConfig.getKafkaBroker(),
-                Serdes.String().getClass().getName(), CurrentAgentSerde.class));
+                Serdes.String().getClass().getName(), CurrentAgentSerde.class, "earliest"));
         final KafkaStreams streamsDeleteProducer;
+
+        final String startingOffsetStream;
+        if (seraphRegisteredQuery.getWindow().getStart() instanceof EventStart)
+            startingOffsetStream = ((EventStart) seraphRegisteredQuery.getWindow().getStart()).getEvent().toString().toLowerCase();
+        else startingOffsetStream = "earliest"; //todo window start time
 
         if (seraphRegisteredQuery.getWindow().getRange().isTimeRange())
             streamsDeleteProducer = new KafkaStreams(builder_deleteRecordByTime.build(),
                     getStreamProperties(registerQuery.getQueryID() +"_dozer-delete-stream-time-app", DozerConfig.getKafkaBroker(),
-                            Serdes.String().getClass().getName(), CdcSerde.class));
+                            Serdes.String().getClass().getName(), CdcSerde.class, startingOffsetStream));
         else
             streamsDeleteProducer = new KafkaStreams(deleteByEvent_topology,
                     getStreamProperties(registerQuery.getQueryID() +"_dozer-delete-stream-event-app", DozerConfig.getKafkaBroker(),
-                            Serdes.String().getClass().getName(), CdcSerde.class));
+                            Serdes.String().getClass().getName(), CdcSerde.class, startingOffsetStream));
 
         final StreamsBuilder converterBuilder = new StreamsBuilder();
         convertPgToCDC(converterBuilder, seraphRegisteredQuery.getInputStream());
         final KafkaStreams streamsConverter = new KafkaStreams(converterBuilder.build(),
                 getStreamProperties(registerQuery.getQueryID() +"_dozer-converter-processors-app", DozerConfig.getKafkaBroker(),
-                        Serdes.String().getClass().getName(), CdcSerde.class));
+                        Serdes.String().getClass().getName(), CdcSerde.class, startingOffsetStream));
 
-        Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
+        Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("parser")); //todo
         kafkaProducer.send(new ProducerRecord<>(DozerConfig.getWorkFlowTopic(),
                 new CurrentAgent("SERAPH_QUERY_PARSED",
                         "completed", 0L))); //todo move this in BullDozer

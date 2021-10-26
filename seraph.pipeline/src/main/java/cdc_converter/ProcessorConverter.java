@@ -21,7 +21,7 @@ public class ProcessorConverter implements Processor<String, JsonPG> {
     @Override
     public void init(final ProcessorContext context) {
         this.context = context;
-        this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
+        this.kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("converter"));
     }
 
     @Override

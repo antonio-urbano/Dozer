@@ -37,7 +37,7 @@ public class TimeManagedConsumer {
         Consumer<String, Object> consumer = cf.createConsumer();
         consumer.assign(Collections.singletonList(topicPartition));
 
-        Producer<String, Object> producer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
+        Producer<String, Object> producer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("time_managed_consumer"));//todo
 
         if(offsetToRead==null)
             offsetToRead=consumer.beginningOffsets(Collections.singletonList(topicPartition)).get(topicPartition);
