@@ -152,8 +152,10 @@ public class DozerSetup {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("application/json");
+        String bodyString = getKafkaConnectRequestBody().toString();
         RequestBody body = RequestBody.create(mediaType,
                 getKafkaConnectRequestBody().toString());
+
         Request request = new Request.Builder()
                 .url("http://" + DozerConfig.getKafkaConnect() + "/connectors")
                 .method("POST", body)
@@ -162,7 +164,7 @@ public class DozerSetup {
                 .build();
         try {
             Response response = client.newCall(request).execute();
-            System.out.println(response.body().string());
+            assert response.isSuccessful();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -175,7 +177,7 @@ public class DozerSetup {
         connector.put("name", CONNECTOR_NAME);
 
         Map config = new HashMap();
-        config.put("connector.class", "streams.kafka.connect.sink." + CONNECTOR_NAME);
+        config.put("connector.class", "streams.kafka.connect.sink.Neo4jSinkConnector");
         config.put("key.converter", "org.apache.kafka.connect.storage.StringConverter");
         config.put("value.converter", "org.apache.kafka.connect.json.JsonConverter");
         config.put("value.converter.schemas.enable", false);
