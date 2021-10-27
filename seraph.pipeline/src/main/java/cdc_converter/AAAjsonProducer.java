@@ -14,7 +14,7 @@ public class AAAjsonProducer {
     public static void main(final String[] args) throws FileNotFoundException {
         BufferedReader br = new BufferedReader(new FileReader("/home/antonio/Scrivania/personPgJson.json"));
         JsonPG pg = new Gson().fromJson(br, JsonPG.class);
-        final Producer<String, JsonPG> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties());
+        final Producer<String, JsonPG> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("test"));
         kafkaProducer.send(new ProducerRecord<>("eventtopic", pg));
         kafkaProducer.flush();
         kafkaProducer.close();

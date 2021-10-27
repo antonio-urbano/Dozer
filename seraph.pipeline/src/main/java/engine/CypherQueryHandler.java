@@ -1,21 +1,28 @@
 package engine;
 
+import com.opencsv.CSVWriter;
 import config.DozerConfig;
 import org.json.JSONObject;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.internal.value.NodeValue;
 import org.neo4j.driver.internal.value.RelationshipValue;
+import org.neo4j.driver.summary.ResultSummary;
 import org.neo4j.driver.util.Pair;
 import seraphGrammar.RegisterQuery;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class CypherQueryHandler implements AutoCloseable{
 
     private Driver driver;
     private final String cypherQuery;
     private final String kafkaTopic;
+//    private SummaryWriterCSV summaryWriterCSV;
 
 
     public CypherQueryHandler(String uri, String user, String password)
@@ -25,6 +32,20 @@ public class CypherQueryHandler implements AutoCloseable{
         RegisterQuery registerQuery = (RegisterQuery) DozerConfig.getSeraphQuery();
         this.cypherQuery = registerQuery.getSeraphQuery().getCypherQuery();
         this.kafkaTopic = registerQuery.getSeraphQuery().getOutputStream();
+//        this.summaryWriterCSV = new SummaryWriterCSV();
+    }
+
+    private void writeSummary(ResultSummary summary) throws IOException {
+        String csv = "/home/antonio/Scrivania/csvSummary/summary.csv";
+        CSVWriter writer = new CSVWriter(new FileWriter(csv, true));
+
+        String times = summary.resultAvailableAfter(TimeUnit.MICROSECONDS) + ","+summary.resultConsumedAfter(TimeUnit.MICROSECONDS);
+        String [] record = times.split(",");
+
+        writer.writeNext(record);
+
+        writer.close();
+
     }
 
     /**
@@ -42,10 +63,18 @@ public class CypherQueryHandler implements AutoCloseable{
                 cypherResultRecord = checkRecordType(result.peek().fields());
             else return null;
 
+//            List<String[]> dataLines = new ArrayList<>();
+//            dataLines.add(new String[]
+//                    {Long.toString(result.consume().resultConsumedAfter(TimeUnit.MICROSECONDS)),Long.toString(result.consume().resultAvailableAfter(TimeUnit.MICROSECONDS)) });
+//            summaryWriterCSV.givenDataArray_whenConvertToCSV_thenOutputCreated(dataLines);
+//            try {
+//                writeSummary(result.consume());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
             while (result.hasNext()) {
                 Record record = result.next();
                 jsonResultRecord = cypherResultRecord != null ? cypherResultRecord.produceRecord(record.fields()) : null;
-
             }
 
             return jsonResultRecord;

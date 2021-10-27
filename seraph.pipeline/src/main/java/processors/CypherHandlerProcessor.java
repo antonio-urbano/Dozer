@@ -11,6 +11,8 @@ import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 
+import java.io.IOException;
+
 /**
  * Processor to handle the cypher query.
  * Once the {@link TimeManagedProcessorInsertion} ends its process, it uses the
@@ -52,7 +54,11 @@ public class CypherHandlerProcessor implements Processor<String, CurrentAgent> {
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", (currentAgent.getTimestampToSync()));
-            this.cypherHandler.cypherResultIntoKafka();
+//            try {
+                this.cypherHandler.cypherResultIntoKafka();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();

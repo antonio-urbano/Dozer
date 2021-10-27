@@ -31,7 +31,7 @@ public class ProcessorConverter implements Processor<String, JsonPG> {
             CdcCreateRecord cdcNode = new CdcCreateRecord(generateMeta(DozerConfig.getNeo4jUsername(), node.getId(),
                     pg.getNodes().indexOf(node), txEventsCount, DozerConfig.getNeo4jHostname()),
                     generateNodePayload(node), generateSchema(node));
-            kafkaProducer.send(new ProducerRecord<>(DozerConfig.getCdcCreateNodesTopic(), cdcNode));
+            kafkaProducer.send(new ProducerRecord<>(DozerConfig.getCdcCreateNodesTopic(), 0, this.context.timestamp(), key,cdcNode));
             kafkaProducer.flush();
         }
         for (PgEdge edge:pg.getEdges()){//todo params meta
@@ -39,7 +39,7 @@ public class ProcessorConverter implements Processor<String, JsonPG> {
                     pg.getEdges().indexOf(edge)+pg.getNodes().size(),
                     txEventsCount, DozerConfig.getNeo4jHostname()),
                     generateRelationshipPayload(edge), generateSchema(edge));
-            kafkaProducer.send(new ProducerRecord<>(DozerConfig.getCdcCreateRelationshipsTopic(), cdcEdge));
+            kafkaProducer.send(new ProducerRecord<>(DozerConfig.getCdcCreateRelationshipsTopic(), 0,this.context.timestamp(), key,cdcEdge));
             kafkaProducer.flush();
         }
 

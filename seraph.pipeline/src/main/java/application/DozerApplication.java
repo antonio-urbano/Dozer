@@ -218,7 +218,7 @@ public class DozerApplication {
         final StreamsBuilder converterBuilder = new StreamsBuilder();
         convertPgToCDC(converterBuilder, seraphRegisteredQuery.getInputStream());
         final KafkaStreams streamsConverter = new KafkaStreams(converterBuilder.build(),
-                getStreamProperties(registerQuery.getQueryID() +"_dozer-converter-processors-app", DozerConfig.getKafkaBroker(),
+                getStreamProperties(registerQuery.getQueryID() +"_dozer-converter-processors-app", "ec2-15-160-92-234.eu-south-1.compute.amazonaws.com:9092",
                         Serdes.String().getClass().getName(), CdcSerde.class, startingOffsetStream));
 
         Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("parser")); //todo

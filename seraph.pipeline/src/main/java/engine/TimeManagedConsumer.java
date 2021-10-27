@@ -49,7 +49,7 @@ public class TimeManagedConsumer {
             if (!records.isEmpty()) {
                 for (ConsumerRecord<String, Object> r : records.records(topicPartition)) {
                     if (r.timestamp() < timestampToSync) {
-                        producer.send(new ProducerRecord<>(outputTopic, r.key(), r.value()));
+                        producer.send(new ProducerRecord<>(outputTopic, 0, r.timestamp(), r.key(), r.value()));
                         producer.flush();
                         offsetToRead = r.offset() + 1;
                     }
