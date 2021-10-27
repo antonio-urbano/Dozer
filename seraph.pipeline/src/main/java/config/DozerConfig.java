@@ -13,6 +13,7 @@ public class DozerConfig {
     private static String getEnv(String name) {
         String value = System.getenv(name);
         Objects.requireNonNull(value, name + " env variable not set!");
+        System.out.println(name + " : " + value);
         return value;
     }
     public static String getKafkaBroker() {

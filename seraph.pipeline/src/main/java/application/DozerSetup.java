@@ -70,7 +70,6 @@ public class DozerSetup {
     public static void deleteTopics() {
         Properties adminClientProps = new Properties();
         adminClientProps.put("bootstrap.servers", DozerConfig.getKafkaBroker());
-        adminClientProps.put(TopicConfig.RETENTION_MS_CONFIG, "-1");
 
         AdminClient adminClient = KafkaAdminClient.create(adminClientProps);
 
@@ -99,7 +98,6 @@ public class DozerSetup {
     public static void createTopics() {
         Properties adminClientProps = new Properties();
         adminClientProps.put("bootstrap.servers", DozerConfig.getKafkaBroker());
-        adminClientProps.put(TopicConfig.RETENTION_MS_CONFIG, "-1");
 
         AdminClient adminClient = KafkaAdminClient.create(adminClientProps);
 
@@ -132,9 +130,7 @@ public class DozerSetup {
     public static void deleteNeo4jPlugin() {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
-        MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(mediaType,
-                getKafkaConnectRequestBody().toString());
+
         Request request = new Request.Builder()
                 .url("http://" + DozerConfig.getKafkaConnect() + "/connectors/" + CONNECTOR_NAME)
                 .method("DELETE", RequestBody.create(new byte[]{}))
