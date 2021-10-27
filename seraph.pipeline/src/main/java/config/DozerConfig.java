@@ -3,46 +3,58 @@ package config;
 import seraphGrammar.Query;
 import seraphGrammar.SeraphQueryParser;
 
+import java.util.Objects;
+
 public class DozerConfig {
     public static Query getSeraphQuery() {
         return SeraphQueryParser.parse(System.getenv("SERAPH_QUERY"));
     }
 
+    private static String getEnv(String name) {
+        String value = System.getenv(name);
+        Objects.requireNonNull(value, name + " env variable not set!");
+        return value;
+    }
     public static String getKafkaBroker() {
         // expecting something like localhost:9092
-        return System.getenv("KAFKA_BROKER");
+        return getEnv("KAFKA_BROKER");
     }
 
     public static String getKafkaBrokerConnector() {
         // expecting something like localhost:9093
-        return System.getenv("KAFKA_BROKER_CONNECTOR");
+        return getEnv("KAFKA_BROKER_CONNECTOR");
     }
 
     public static String getKafkaConnect() {
         // expecting something like localhost:8083
-        return System.getenv("KAFKA_CONNECT");
+        return getEnv("KAFKA_CONNECT");
     }
 
     public static String getNeo4jHostname() {
         // expecting something like localhost
-        return System.getenv("NEO4J_HOSTNAME");
+        return getEnv("NEO4J_HOSTNAME");
     }
 
     public static String getNeo4jBolt() {
         // expecting something like bolt://localhost:7687
-        return System.getenv("NEO4J_BOLT");
+        return getEnv("NEO4J_BOLT");
+    }
+
+    public static String getKafkaConnectNeo4jBolt() {
+        // expecting something like bolt://localhost:7687
+        return getEnv("KAFKA_CONNECT_NEO4J_BOLT");
     }
 
     public static String getNeo4jUsername() {
-        return System.getenv("NEO4J_USERNAME");
+        return getEnv("NEO4J_USERNAME");
     }
 
     public static String getNeo4jPassword() {
-        return System.getenv("NEO4J_PASSWORD");
+        return getEnv("NEO4J_PASSWORD");
     }
 
     public static Boolean getForceRestart() {
-        return Boolean.valueOf(System.getenv("FORCE_RESTART"));
+        return Boolean.valueOf(getEnv("FORCE_RESTART"));
     }
 
     public static String getCdcDeleteRelationshipsTopic() {

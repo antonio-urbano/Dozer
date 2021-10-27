@@ -188,7 +188,7 @@ public class DozerSetup {
         config.put("errors.tolerance", "all");
         config.put("errors.log.enable", true);
         config.put("errors.log.include.messages", true);
-        config.put("neo4j.server.uri", DozerConfig.getNeo4jBolt());
+        config.put("neo4j.server.uri", DozerConfig.getKafkaConnectNeo4jBolt());
         config.put("neo4j.authentication.basic.username", DozerConfig.getNeo4jUsername());
         config.put("neo4j.authentication.basic.password", DozerConfig.getNeo4jPassword());
         config.put("neo4j.encryption.enabled", false);

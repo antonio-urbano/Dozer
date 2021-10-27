@@ -14,7 +14,9 @@ import seraphGrammar.RegisterQuery;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class CypherQueryHandler implements AutoCloseable{
@@ -84,12 +86,17 @@ public class CypherQueryHandler implements AutoCloseable{
     /**
      * Write the result record into kafka
      */
-    public void cypherResultIntoKafka(){
+    public void cypherResultIntoKafka(Long timestamp){
         KafkaResultProducer kafkaResultProducer = new KafkaResultProducer(this.getClass().getSimpleName());
         JSONObject jsonQueryResult = runQuery();
-        if (jsonQueryResult==null)
-            System.err.println("Null query result");        //todo null query result
-        else  kafkaResultProducer.producerResultRecord(this.kafkaTopic, jsonQueryResult);
+        if (jsonQueryResult==null) {
+            Map result = new HashMap();
+            Map metadata = new HashMap();
+            metadata.put("_result_size", 0);
+            result.put("_metadata", metadata);
+
+            kafkaResultProducer.producerResultRecord(this.kafkaTopic, new JSONObject(result), timestamp);
+        } else  kafkaResultProducer.producerResultRecord(this.kafkaTopic, jsonQueryResult, timestamp);
 
     }
 

@@ -55,7 +55,7 @@ public class CypherHandlerProcessor implements Processor<String, CurrentAgent> {
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", (currentAgent.getTimestampToSync()));
 //            try {
-                this.cypherHandler.cypherResultIntoKafka();
+                this.cypherHandler.cypherResultIntoKafka(currentAgent.getTimestampToSync());
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
