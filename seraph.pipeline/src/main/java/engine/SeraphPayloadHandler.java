@@ -25,7 +25,7 @@ import java.util.Map;
 public class SeraphPayloadHandler {
 
     //todo handle read first record when neo4j is not populated
-    public static Long getInitTimeToSync(String inputStream, Start windowStart) {
+    public static Long getInitTimeToSync(String inputStream, Start windowStart) throws Exception {
         if (windowStart instanceof EventStart){
             Event event = ((EventStart) windowStart).getEvent();
             ConsumerRecord<String, ?> relationshipRecord = null;
@@ -36,7 +36,7 @@ public class SeraphPayloadHandler {
 
             if (relationshipRecord!=null)
                 return relationshipRecord.timestamp();
-            else return null;
+            else throw new Exception("Cannot consume fisrt record!");
         }
         else
             return ((TimeStart) windowStart).getInstant().toEpochMilli();
@@ -72,7 +72,7 @@ public class SeraphPayloadHandler {
         consumer.assign(Collections.singletonList(topicPartitionToConsume));
 
         consumer.seek(topicPartitionToConsume, consumer.beginningOffsets(Collections.singletonList(topicPartitionToConsume)).get(topicPartitionToConsume));
-        ConsumerRecords<String, ?> records = consumer.poll(Duration.ofMillis(100));
+        ConsumerRecords<String, ?> records = consumer.poll(Duration.ofMillis(10000));
         if(!records.isEmpty())
             return records.records(topicPartitionToConsume).get(0);
         else return null;       //todo handle empty record

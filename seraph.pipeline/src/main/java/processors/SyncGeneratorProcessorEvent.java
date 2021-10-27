@@ -66,8 +66,14 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
         //todo handle "key", "value"
         if (currentAgent.getAgentName().equals("SERAPH_QUERY_PARSED")
                 && currentAgent.getStatus().equals("completed")){
-            CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
-                    "completed", SeraphPayloadHandler.getInitTimeToSync(this.inputStream, this.windowStart)); //todo handle empty stream, Todo STARTING FROM
+            CurrentAgent updatedAgent = null; //todo handle empty stream, Todo STARTING FROM
+            try {
+                updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
+                        "completed", SeraphPayloadHandler.getInitTimeToSync(this.inputStream, this.windowStart));
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();

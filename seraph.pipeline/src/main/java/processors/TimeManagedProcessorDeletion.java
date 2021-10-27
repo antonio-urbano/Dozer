@@ -55,7 +55,9 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
                 && currentAgent.getStatus().equals("completed")){
             Long offsetToRead = TimeManagedConsumer.delayedStream_seek
                     (new TopicPartition(DozerConfig.getCdcDeleteRelationshipsTopic(), 0),
-                            DozerConfig.getNeo4jPluginRelationshipsTopic(), currentAgent.getTimestampToSync(), this.offsetKvStore.get("value-deletion"));
+                            DozerConfig.getNeo4jPluginRelationshipsTopic(),
+                            currentAgent.getTimestampToSync(),
+                            this.offsetKvStore.get("value-deletion"));
             this.offsetKvStore.put("value-deletion", offsetToRead);
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", currentAgent.getTimestampToSync());

@@ -178,6 +178,7 @@ public class DozerApplication {
         //todo initialization time to sync from inputStream or from CDC
         if (seraphRegisteredQuery.getReport().getRange().isTimeRange()) {
             TimeRange timeRange = (TimeRange) seraphRegisteredQuery.getReport().getRange();
+
             builder.addProcessor("SyncGeneratorProcessor", () -> new SyncGeneratorProcessorTime(
                     timeRange.getDuration().toMillis(), AGENT_STORE,
                             DozerConfig.getCdcCreateRelationshipsTopic(), seraphRegisteredQuery.getWindow().getStart()),
