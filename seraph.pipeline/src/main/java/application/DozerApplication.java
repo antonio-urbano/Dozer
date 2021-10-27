@@ -123,6 +123,23 @@ public class DozerApplication {
         }
         else seraphRegisteredQuery =  registerQuery.getSeraphQuery();
 
+        if (DozerConfig.getForceRestart()) {
+            System.out.println("FORCE RESTART");
+            DozerSetup.deleteNeo4jPlugin();
+            DozerSetup.deleteTopics();
+            DozerSetup.deleteAllFromNeo4j();
+            Thread.sleep(2000);
+        }
+
+        if (DozerSetup.isFreshStart()) {
+            System.out.println("FRESH START");
+            DozerSetup.createTopics();
+            DozerSetup.createNeo4jPlugin();
+            DozerSetup.createStartMessage();
+            Thread.sleep(2000);
+        }
+
+        System.out.println("STARTING");
 
 
         JsonSerializer<CurrentAgent> agentJsonSerializer = new JsonSerializer<>();
@@ -221,12 +238,7 @@ public class DozerApplication {
                 getStreamProperties(registerQuery.getQueryID() +"_dozer-converter-processors-app", "ec2-15-160-92-234.eu-south-1.compute.amazonaws.com:9092",
                         Serdes.String().getClass().getName(), CdcSerde.class, startingOffsetStream));
 
-        Producer<String, CurrentAgent> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("parser")); //todo
-        kafkaProducer.send(new ProducerRecord<>(DozerConfig.getWorkFlowTopic(),
-                new CurrentAgent("SERAPH_QUERY_PARSED",
-                        "completed", 0L))); //todo move this in BullDozer
-        kafkaProducer.flush();
-        kafkaProducer.close();
+
 
         // attach shutdown handler to catch control-c
         Runtime.getRuntime().addShutdownHook(new Thread(registerQuery.getQueryID() +"_dozer-currentAgentStreams-shutdown-hook") {
