@@ -49,15 +49,6 @@ public class CypherQueryHandler implements AutoCloseable{
                 cypherResultRecord = checkRecordType(result.peek().fields());
             else return null;
 
-//            List<String[]> dataLines = new ArrayList<>();
-//            dataLines.add(new String[]
-//                    {Long.toString(result.consume().resultConsumedAfter(TimeUnit.MICROSECONDS)),Long.toString(result.consume().resultAvailableAfter(TimeUnit.MICROSECONDS)) });
-//            summaryWriterCSV.givenDataArray_whenConvertToCSV_thenOutputCreated(dataLines);
-//            try {
-//                writeSummary(result.consume());
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
             while (result.hasNext()) {
                 Record record = result.next();
                 jsonResultRecord = cypherResultRecord != null ? cypherResultRecord.produceRecord(record.fields()) : null;
