@@ -9,7 +9,7 @@ import java.util.Properties;
 
 public class deleteTopic {
     public static void main(String[] args) {
-        final String topicName = "test-dataset";
+        final String topicName = "dataset-small";
         final String bootstrapServers =  "ec2-15-160-92-234.eu-south-1.compute.amazonaws.com:9092";
         Properties adminClientProps = new Properties();
         adminClientProps.put("bootstrap.servers",bootstrapServers);

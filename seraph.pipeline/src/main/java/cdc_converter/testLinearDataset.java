@@ -48,15 +48,6 @@ public class testLinearDataset {
         nodes.add(node);
         JsonPG jsonPG = new JsonPG(nodes, new ArrayList<>());
 
-        /*kafkaProducer.send(new ProducerRecord<>("eventtopic", jsonPG));
-        kafkaProducer.flush();*/
-        Writer writer = new FileWriter("/home/antonio/Scrivania/testDozer/"+initTimestamp.get()+".json");
-        Gson gson = new GsonBuilder().create();
-        gson.toJson(jsonPG, writer);
-        writer.flush(); //flush data to file   <---
-        writer.close(); //close write
-
-
         // creating timer task, timer
         Timer t = new Timer();
         TimerTask tt = new TimerTask() {

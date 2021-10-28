@@ -14,6 +14,8 @@ import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 import seraphGrammar.Start;
 
+import java.time.Instant;
+
 
 /**
  * Processor to handle the synchronization between all the processors in the topology according to the EVERY
@@ -91,9 +93,16 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
             this.offsetKvStore.put("value-sync-generator-event", offsetToRead);
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", timestampToSync);
+            if (!DozerConfig.getStopDatetime().equals("-1")){
+                if (updatedAgent.getTimestampToSync() > Instant.parse(DozerConfig.getStopDatetime()).toEpochMilli()){
+                    System.out.println("Terminating because i reached the STOP_DATETIME!");
+                    System.exit(0);
+                }
+            }
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key",updatedAgent);
             this.context.commit();
+
         }
     }
 

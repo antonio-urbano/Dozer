@@ -16,6 +16,7 @@ public class DozerConfig {
         System.out.println(name + " : " + value);
         return value;
     }
+
     public static String getKafkaBroker() {
         // expecting something like localhost:9092
         return getEnv("KAFKA_BROKER");
@@ -44,6 +45,11 @@ public class DozerConfig {
     public static String getKafkaConnectNeo4jBolt() {
         // expecting something like bolt://localhost:7687
         return getEnv("KAFKA_CONNECT_NEO4J_BOLT");
+    }
+
+    public static String getStopDatetime() {
+        // expecting something like 2021-01-01T00:00:00Z or -1
+        return getEnv("STOP_DATETIME");
     }
 
     public static String getNeo4jUsername() {
