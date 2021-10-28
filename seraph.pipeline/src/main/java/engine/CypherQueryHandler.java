@@ -40,9 +40,9 @@ public class CypherQueryHandler implements AutoCloseable{
      * @return the result of the cypher query as JSONObject format
      */
     private JSONObject runQuery() {
+        JSONObject jsonResultRecord = null;
         try (Session session = driver.session()) {
             Result result = session.run(this.cypherQuery);
-            JSONObject jsonResultRecord = null;
             CypherResultRecord cypherResultRecord;
 
             if (result.hasNext())
@@ -64,12 +64,7 @@ public class CypherQueryHandler implements AutoCloseable{
             }
 
             ResultSummary summary = result.consume();
-            CSVWriter writer = null;
-            try {
-                writer = new CSVWriter(new FileWriter(DozerConfig.getTestFolder()+"/"+DozerConfig.getSeraphQuery().getQueryID()+".csv", true));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            CSVWriter writer = new CSVWriter(new FileWriter(DozerConfig.getTestFolder()+"/"+DozerConfig.getSeraphQuery().getQueryID()+".csv", true));
             String plan;
             String evaluation = summary.resultAvailableAfter(TimeUnit.MICROSECONDS) + ","+summary.resultConsumedAfter(TimeUnit.MICROSECONDS);
             if (summary.hasPlan()) {
@@ -81,14 +76,13 @@ public class CypherQueryHandler implements AutoCloseable{
             }
             String [] record = evaluation.split(",");
             writer.writeNext(record);
-            try {
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            writer.close();
 
-            return jsonResultRecord;
+        }catch (IOException e) {
+            e.printStackTrace();
         }
+        return jsonResultRecord;
+
     }
 
     /**
