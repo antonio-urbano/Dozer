@@ -24,8 +24,6 @@ public class CypherQueryHandler implements AutoCloseable{
     private Driver driver;
     private final String cypherQuery;
     private final String kafkaTopic;
-//    private SummaryWriterCSV summaryWriterCSV;
-
 
     public CypherQueryHandler(String uri, String user, String password)
     {
@@ -34,20 +32,6 @@ public class CypherQueryHandler implements AutoCloseable{
         RegisterQuery registerQuery = (RegisterQuery) DozerConfig.getSeraphQuery();
         this.cypherQuery = registerQuery.getSeraphQuery().getCypherQuery();
         this.kafkaTopic = registerQuery.getSeraphQuery().getOutputStream();
-//        this.summaryWriterCSV = new SummaryWriterCSV();
-    }
-
-    private void writeSummary(ResultSummary summary) throws IOException {
-        String csv = "/home/antonio/Scrivania/csvSummary/summary.csv";
-        CSVWriter writer = new CSVWriter(new FileWriter(csv, true));
-
-        String times = summary.resultAvailableAfter(TimeUnit.MICROSECONDS) + ","+summary.resultConsumedAfter(TimeUnit.MICROSECONDS);
-        String [] record = times.split(",");
-
-        writer.writeNext(record);
-
-        writer.close();
-
     }
 
     /**
@@ -77,6 +61,30 @@ public class CypherQueryHandler implements AutoCloseable{
             while (result.hasNext()) {
                 Record record = result.next();
                 jsonResultRecord = cypherResultRecord != null ? cypherResultRecord.produceRecord(record.fields()) : null;
+            }
+
+            ResultSummary summary = result.consume();
+            CSVWriter writer = null;
+            try {
+                writer = new CSVWriter(new FileWriter(DozerConfig.getTestFolder()+"/"+DozerConfig.getSeraphQuery().getQueryID()+".csv", true));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            String plan;
+            String evaluation = summary.resultAvailableAfter(TimeUnit.MICROSECONDS) + ","+summary.resultConsumedAfter(TimeUnit.MICROSECONDS);
+            if (summary.hasPlan()) {
+                plan = summary.profile().dbHits() + ","
+                        + summary.profile().records() + ","
+                        + summary.profile().time() + ","
+                        + summary.profile().pageCacheHitRatio();
+                evaluation.concat(plan);
+            }
+            String [] record = evaluation.split(",");
+            writer.writeNext(record);
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             return jsonResultRecord;
