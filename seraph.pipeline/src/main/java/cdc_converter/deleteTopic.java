@@ -1,5 +1,6 @@
 package cdc_converter;
 
+import config.DozerConfig;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.config.TopicConfig;
 
@@ -10,7 +11,7 @@ import java.util.Properties;
 public class deleteTopic {
     public static void main(String[] args) {
         final String topicName = "dataset-small";
-        final String bootstrapServers =  "ec2-15-160-92-234.eu-south-1.compute.amazonaws.com:9092";
+        final String bootstrapServers = DozerConfig.getKafkaBroker();
         Properties adminClientProps = new Properties();
         adminClientProps.put("bootstrap.servers",bootstrapServers);
 

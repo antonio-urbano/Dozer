@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class LinearDataset {
     public static String TOPIC = "test-dataset-small";
-    public static String BROKER = "ec2-15-160-92-234.eu-south-1.compute.amazonaws.com:9092";
+    public static String BROKER = "localhost:9092";
     public static Instant START_INSTANT = Instant.parse("2021-01-01T00:00:00Z");
     public static Duration TIME_RANGE = Duration.parse("PT1H");
     public static Long PRODUCTION_PERIOD_MS = 15000L;
