@@ -9,7 +9,7 @@ do
     echo "Executing Dozer with found query"
 
     docker run \
-          -n dozer-network \
+          --network dozer-network \
           -e "SERAPH_QUERY=${query}" \
           -e "KAFKA_BROKER=broker:9093" \
           -e "NEO4J_BOLT=bolt://neo4j-sink:7687" \
@@ -21,7 +21,7 @@ do
           -e "FORCE_RESTART=true" \
           -e "KAFKA_CONNECT_NEO4J_BOLT=bolt://neo4j-sink:7687" \
           -e "TEST_FOLDER=/test-result" \
-          -e "STOP_DATETIME=2021-01-01T00:05:00Z" \
+          -e "STOP_DATETIME=2021-01-01T01:00:00Z" \
           -v ${PWD}/test-results:/test-results \
         dozer
 done

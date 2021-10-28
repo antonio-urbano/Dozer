@@ -252,6 +252,8 @@ public class DozerApplication {
             }
         });
 
+
+
         try {
             streamsConverter.start();
             currentAgentStreams.start();

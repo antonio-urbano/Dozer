@@ -3,19 +3,18 @@ package dataset;
 import cdc_converter.JsonPG;
 import cdc_converter.PgEdge;
 import cdc_converter.PgNode;
+import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -31,6 +30,24 @@ public class LinearDataset {
         System.out.println("TOPIC: " + TOPIC);
         System.out.println("START INSTANT: " + START_INSTANT.toString());
         System.out.println("TIME RANGE: " + TIME_RANGE.toString());
+
+        Properties adminClientProps = new Properties();
+        adminClientProps.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER);
+
+        AdminClient adminClient = KafkaAdminClient.create(adminClientProps);
+
+        NewTopic kafkaTopic = new NewTopic(TOPIC, 1, (short) 1);
+        kafkaTopic.configs(Map.of(TopicConfig.RETENTION_MS_CONFIG, "-1"));
+
+        try {
+            DeleteTopicsResult deleteTopicsResult = adminClient.deleteTopics(List.of(TOPIC));
+            while (!deleteTopicsResult.all().isDone()) {};
+            CreateTopicsResult createTopicsResult = adminClient.createTopics(List.of(kafkaTopic));
+            while(!createTopicsResult.all().isDone()) {};
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
 
         Properties producerProps = new Properties();
         producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER);

@@ -96,7 +96,7 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
             if (!DozerConfig.getStopDatetime().equals("-1")){
                 if (updatedAgent.getTimestampToSync() > Instant.parse(DozerConfig.getStopDatetime()).toEpochMilli()){
                     System.out.println("Terminating because i reached the STOP_DATETIME!");
-                    System.exit(0);
+                    Runtime.getRuntime().halt(0);
                 }
             }
             this.kvStore.put("key", updatedAgent);
