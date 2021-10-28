@@ -19,11 +19,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class LinearDataset {
-    public static String TOPIC = "test-dataset-small";
+    public static String TOPIC = "test-dataset";
     public static String BROKER = "localhost:9092";
     public static Instant START_INSTANT = Instant.parse("2021-01-01T00:00:00Z");
-    public static Duration TIME_RANGE = Duration.parse("PT1H");
-    public static Long PRODUCTION_PERIOD_MS = 15000L;
+    public static Duration TIME_RANGE = Duration.parse("P7DT0S");//PT1H
+    public static Long PRODUCTION_PERIOD_MS = 500L;
 
     public static void main(String[] args) {
         System.out.println("BROKER: " + BROKER);
@@ -75,15 +75,21 @@ public class LinearDataset {
         PgNode node = new PgNode(personID.get(), labelsPerson, propertiesPerson);
         ArrayList<PgNode> nodes = new ArrayList<>();
         nodes.add(node);
-        JsonPG jsonPG = new JsonPG(nodes, new ArrayList<>());
+        JsonPG jsonPG;
+
 
         while (initTimestamp.get() < START_INSTANT.plus(TIME_RANGE).toEpochMilli()) {
+
+            nameProperties = new ArrayList<>();
+            nameProperties.add("P" + (personID.get()+1));
 
             timestampProperties = new ArrayList<>();
             initTimestamp.set(initTimestamp.get() + PRODUCTION_PERIOD_MS);
             timestampProperties.add(0, initTimestamp.get());
 
+            propertiesPerson.put("name", nameProperties);
             propertiesPerson.put("timestamp", timestampProperties);
+
             node = new PgNode(personID.get() + 1, labelsPerson, propertiesPerson);
             nodes.set(0, node);
 
