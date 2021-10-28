@@ -19,5 +19,5 @@ services:
 
 networks:
   default:
-    external: true
-    name: dozer-network
+    external:
+       name: dozer-network
