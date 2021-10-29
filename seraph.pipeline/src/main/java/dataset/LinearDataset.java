@@ -19,10 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class LinearDataset {
-    public static String TOPIC = "test-dataset";
+    //linear-test-dataset-small: (PRODUCTION period = 15000ms), every minute 4 new links per PT1H = 240 nodes
+    //linear-test-dataset: (PRODUCTION period = 500ms) every second 2 new links per P7DT0S = (7*24*60*60*2) = 1209600 nodes
+    public static String TOPIC = "linear-test-dataset";
     public static String BROKER = "localhost:9092";
     public static Instant START_INSTANT = Instant.parse("2021-01-01T00:00:00Z");
-    public static Duration TIME_RANGE = Duration.parse("P7DT0S");//PT1H
+    public static Duration TIME_RANGE = Duration.parse("P7DT0S");
     public static Long PRODUCTION_PERIOD_MS = 500L;
 
     public static void main(String[] args) {

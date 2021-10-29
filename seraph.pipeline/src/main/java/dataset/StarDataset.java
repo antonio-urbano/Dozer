@@ -19,12 +19,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class StarDataset {
+    //star-test-dataset-small: (PRODUCTION period = 30000ms), every minute 2 nodes linked to 3 other nodes per PT1H = 360 nodes
+    //star-test-dataset: (PRODUCTION period = 50ms) every second 20 nodes linked to 15 other nodes per P1DT0S = 34560000 nodes in 1728000 events
     public static String TOPIC = "star-test-dataset";
     public static String BROKER = "localhost:9092";
     public static Instant START_INSTANT = Instant.parse("2021-01-01T00:00:00Z");
-    public static Duration TIME_RANGE = Duration.parse("PT5M");//PT1H     //P7DT0S
-    public static Long PRODUCTION_PERIOD_MS = 15000L;
-    public final static int RELATIONSHIPS_PER_NODE = 3;
+    public static Duration TIME_RANGE = Duration.parse("P1DT0S");
+    public static Long PRODUCTION_PERIOD_MS = 50L;
+    public final static int RELATIONSHIPS_PER_NODE = 20;
 
 
     public static void main(String[] args) {
