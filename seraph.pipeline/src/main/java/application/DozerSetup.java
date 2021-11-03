@@ -35,8 +35,8 @@ public class DozerSetup {
         final String WORKFLOW_TOPIC = DozerConfig.getWorkFlowTopic();
         final TopicPartition TOPIC_PARTITION = new TopicPartition(WORKFLOW_TOPIC, 0);
 
-        ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CurrentAgent.class));
-        Consumer<String, Object> consumer = cf.createConsumer();
+        ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CurrentAgent.class, "freshStart"));
+        Consumer<String, Object> consumer = cf.createConsumer(DozerConfig.getSeraphQuery().getQueryID() +"_freshStart", "freshStart");
         consumer.assign(Collections.singletonList(TOPIC_PARTITION));
 
         consumer.seek(
@@ -54,7 +54,6 @@ public class DozerSetup {
                 }
             }
         } while (!records.isEmpty());
-
         return true;
     }
 

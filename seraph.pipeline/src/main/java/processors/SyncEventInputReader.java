@@ -1,6 +1,7 @@
 package processors;
 
 import cdc_converter.CdcCreateRecord;
+import config.DozerConfig;
 import config.KafkaConfigProperties;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -39,8 +40,8 @@ public class SyncEventInputReader {
      */
     static Long[] readCreateEvent(TopicPartition topicPartition, Long emitEveryEventRange, Long offsetToRead) {
 
-        ConsumerFactory<String, CdcCreateRecord> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class));
-        Consumer<String, CdcCreateRecord> consumer = cf.createConsumer();
+        ConsumerFactory<String, CdcCreateRecord> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class, "syncEventRead"));
+        Consumer<String, CdcCreateRecord> consumer = cf.createConsumer(DozerConfig.getSeraphQuery().getQueryID() +"_syncEventRead", "syncEventRead");
         consumer.assign(Collections.singletonList(topicPartition));
 
 

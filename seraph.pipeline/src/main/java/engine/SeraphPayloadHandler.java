@@ -54,9 +54,10 @@ public class SeraphPayloadHandler {
         return props;
     }
 
+    //todo close consumer
     private static ConsumerRecord<String,?> consumeLastRecord(Class<?> classToConsume, TopicPartition topicPartitionToConsume){
         ConsumerFactory<String, ?> cf = new DefaultKafkaConsumerFactory<>(getKafkaConsumerProperties(classToConsume));
-        Consumer<String, ?> consumer = cf.createConsumer();
+        Consumer<String, ?> consumer = cf.createConsumer(); //todo groupId, client
         consumer.assign(Collections.singletonList(topicPartitionToConsume));
 
         consumer.seek(topicPartitionToConsume, consumer.endOffsets(Collections.singletonList(topicPartitionToConsume)).get(topicPartitionToConsume)-1);
@@ -68,11 +69,12 @@ public class SeraphPayloadHandler {
 
     private static ConsumerRecord<String, ?> consumeFirstRecord(Class<?> classToConsume, TopicPartition topicPartitionToConsume){
         ConsumerFactory<String, ?> cf = new DefaultKafkaConsumerFactory<>(getKafkaConsumerProperties(classToConsume));
-        Consumer<String, ?> consumer = cf.createConsumer();
+        Consumer<String, ?> consumer = cf.createConsumer(DozerConfig.getSeraphQuery().getQueryID() +"_timeToSyncInitializer", "_timeToSyncInitializer");
         consumer.assign(Collections.singletonList(topicPartitionToConsume));
 
         consumer.seek(topicPartitionToConsume, consumer.beginningOffsets(Collections.singletonList(topicPartitionToConsume)).get(topicPartitionToConsume));
         ConsumerRecords<String, ?> records = consumer.poll(Duration.ofMillis(10000));
+        consumer.close();
         if(!records.isEmpty())
             return records.records(topicPartitionToConsume).get(0);
         else return null;       //todo handle empty record

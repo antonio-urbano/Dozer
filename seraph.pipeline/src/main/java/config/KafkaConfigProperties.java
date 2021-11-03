@@ -44,11 +44,11 @@ public class KafkaConfigProperties {
      * to allow to consume complex records where the value corresponds to the CdcCreateRecord object
      * @return the kafka consumer configs {@link ConsumerConfig}
      */
-    public static Map<String, Object> getKafkaConsumerProperties(Class<?> deserializerClass) {
+    public static Map<String, Object> getKafkaConsumerProperties(Class<?> deserializerClass, String applicationId) {
         Map<String, Object> props = new HashMap<>();
 
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, DozerConfig.getKafkaBroker());
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, DozerConfig.getSeraphQuery().getQueryID() +"_delayed-consumer");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, DozerConfig.getSeraphQuery().getQueryID() +"_"+applicationId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, deserializerClass);

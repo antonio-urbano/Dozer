@@ -54,23 +54,6 @@ public class CypherQueryHandler implements AutoCloseable{
                 jsonResultRecord = cypherResultRecord != null ? cypherResultRecord.produceRecord(record.fields()) : null;
             }
 
-            ResultSummary summary = result.consume();
-            CSVWriter writer = new CSVWriter(new FileWriter(DozerConfig.getTestFolder()+"/"+DozerConfig.getSeraphQuery().getQueryID()+".csv", true));
-            String plan;
-            String evaluation = summary.resultAvailableAfter(TimeUnit.MICROSECONDS) + ","+summary.resultConsumedAfter(TimeUnit.MICROSECONDS);
-            if (summary.hasPlan()) {
-                plan = summary.profile().dbHits() + ","
-                        + summary.profile().records() + ","
-                        + summary.profile().time() + ","
-                        + summary.profile().pageCacheHitRatio();
-                evaluation.concat(plan);
-            }
-            String [] record = evaluation.split(",");
-            writer.writeNext(record);
-            writer.close();
-
-        }catch (IOException e) {
-            e.printStackTrace();
         }
         return jsonResultRecord;
 

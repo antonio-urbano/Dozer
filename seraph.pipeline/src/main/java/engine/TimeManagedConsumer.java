@@ -1,6 +1,7 @@
 package engine;
 
 import cdc_converter.CdcCreateRecord;
+import config.DozerConfig;
 import config.KafkaConfigProperties;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -31,13 +32,13 @@ public class TimeManagedConsumer {
      * with a timestamp greater than the timestampToSync
      */
 
-    public static Long delayedStream_seek(TopicPartition topicPartition, String outputTopic, Long timestampToSync, Long offsetToRead) {
+    public static Long delayedStream_seek(TopicPartition topicPartition, String outputTopic, Long timestampToSync, Long offsetToRead, String typeDelayed) {
 
-        ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class));
-        Consumer<String, Object> consumer = cf.createConsumer("jsdghsojgh","JVSOJF"); //todo
+        ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class, typeDelayed));
+        Consumer<String, Object> consumer = cf.createConsumer("delayed_consumer", DozerConfig.getSeraphQuery().getQueryID()+"_"+typeDelayed); //todo
         consumer.assign(Collections.singletonList(topicPartition));
 
-        Producer<String, Object> producer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("time_managed_consumer"));//todo
+        Producer<String, Object> producer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("time_managed_consumer_"+typeDelayed));//todo
 
         if(offsetToRead==null)
             offsetToRead=consumer.beginningOffsets(Collections.singletonList(topicPartition)).get(topicPartition);

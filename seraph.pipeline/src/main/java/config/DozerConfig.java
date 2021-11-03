@@ -52,10 +52,6 @@ public class DozerConfig {
         return getEnv("STOP_DATETIME");
     }
 
-    public static String getTestFolder() {
-        // expecting something like 2021-01-01T00:00:00Z or -1
-        return getEnv("TEST_FOLDER");
-    }
 
     public static String getNeo4jUsername() {
         return getEnv("NEO4J_USERNAME");
