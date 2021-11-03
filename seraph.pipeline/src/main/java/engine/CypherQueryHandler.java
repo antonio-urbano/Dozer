@@ -1,13 +1,11 @@
 package engine;
 
-import com.opencsv.CSVWriter;
 import config.DozerConfig;
 import org.json.JSONObject;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.internal.value.NodeValue;
 import org.neo4j.driver.internal.value.RelationshipValue;
-import org.neo4j.driver.summary.ResultSummary;
 import org.neo4j.driver.util.Pair;
 import seraphGrammar.RegisterQuery;
 
