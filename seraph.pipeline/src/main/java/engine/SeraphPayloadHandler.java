@@ -69,7 +69,7 @@ public class SeraphPayloadHandler {
 
     private static ConsumerRecord<String, ?> consumeFirstRecord(Class<?> classToConsume, TopicPartition topicPartitionToConsume){
         ConsumerFactory<String, ?> cf = new DefaultKafkaConsumerFactory<>(getKafkaConsumerProperties(classToConsume));
-        Consumer<String, ?> consumer = cf.createConsumer(DozerConfig.getSeraphQuery().getQueryID() +"_timeToSyncInitializer", "_timeToSyncInitializer");
+        Consumer<String, ?> consumer = cf.createConsumer(); //todo group, client
         consumer.assign(Collections.singletonList(topicPartitionToConsume));
 
         consumer.seek(topicPartitionToConsume, consumer.beginningOffsets(Collections.singletonList(topicPartitionToConsume)).get(topicPartitionToConsume));

@@ -41,7 +41,7 @@ public class SyncEventInputReader {
     static Long[] readCreateEvent(TopicPartition topicPartition, Long emitEveryEventRange, Long offsetToRead) {
 
         ConsumerFactory<String, CdcCreateRecord> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class, "syncEventRead"));
-        Consumer<String, CdcCreateRecord> consumer = cf.createConsumer(DozerConfig.getSeraphQuery().getQueryID() +"_syncEventRead", "syncEventRead");
+        Consumer<String, CdcCreateRecord> consumer = cf.createConsumer(); //todo
         consumer.assign(Collections.singletonList(topicPartition));
 
 

@@ -35,7 +35,7 @@ public class TimeManagedConsumer {
     public static Long delayedStream_seek(TopicPartition topicPartition, String outputTopic, Long timestampToSync, Long offsetToRead, String typeDelayed) {
 
         ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class, typeDelayed));
-        Consumer<String, Object> consumer = cf.createConsumer("delayed_consumer", DozerConfig.getSeraphQuery().getQueryID()+"_"+typeDelayed); //todo
+        Consumer<String, Object> consumer = cf.createConsumer(); //todo
         consumer.assign(Collections.singletonList(topicPartition));
 
         Producer<String, Object> producer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("time_managed_consumer_"+typeDelayed));//todo
