@@ -20,7 +20,7 @@ do
           -e "NEO4J_HOSTNAME=neo4j-sink" \
           -e "FORCE_RESTART=true" \
           -e "KAFKA_CONNECT_NEO4J_BOLT=bolt://neo4j-sink:7687" \
-          -e "STOP_DATETIME=2021-01-01T05:00:00Z" \
+          -e "STOP_DATETIME=2021-01-01T10:00:00Z" \
         dozer
 done
 
