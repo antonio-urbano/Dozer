@@ -26,8 +26,3 @@ do
         dozer
 done
 
-#dentro test-folder
-#ci saranno
-#match_linear_PT1M.csv
-#match_linear_PT10M.csv
-
