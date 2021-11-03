@@ -52,6 +52,10 @@ public class DozerConfig {
         return getEnv("STOP_DATETIME");
     }
 
+    public static String isSummaryTest() {
+        // expecting "true" or "false"
+        return getEnv("IS_SUMMARY_TEST");
+    }
 
     public static String getNeo4jUsername() {
         return getEnv("NEO4J_USERNAME");

@@ -1,11 +1,16 @@
 package engine;
 
 import config.DozerConfig;
+import config.KafkaConfigProperties;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.json.JSONObject;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.internal.value.NodeValue;
 import org.neo4j.driver.internal.value.RelationshipValue;
+import org.neo4j.driver.summary.ResultSummary;
 import org.neo4j.driver.util.Pair;
 import seraphGrammar.RegisterQuery;
 
@@ -19,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CypherQueryHandler implements AutoCloseable{
 
-    private Driver driver;
+    private final Driver driver;
     private final String cypherQuery;
     private final String kafkaTopic;
 
@@ -74,6 +79,21 @@ public class CypherQueryHandler implements AutoCloseable{
 
     }
 
+    public void resultSummaryIntoKafka(Long timestampToSync) {
+        final Producer<String, Map<String,Object>> kafkaProducer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("summaryProducer"));
+        Map evaluation = new HashMap();
+        try (Session session = driver.session()) {
+            ResultSummary summary = session.run(this.cypherQuery).consume();
+            if (summary!=null){
+                evaluation.put("resultAvailableAfter", summary.resultAvailableAfter(TimeUnit.MICROSECONDS));
+                evaluation.put("resultConsumedAfter",summary.resultConsumedAfter(TimeUnit.MICROSECONDS));
+                kafkaProducer.send(new ProducerRecord<>(this.kafkaTopic, 0,timestampToSync,null, evaluation));
+                kafkaProducer.flush();
+                kafkaProducer.close();
+            }
+        }
+    }
+
     /**
      * <p>
      * This method inspects the fields of the cypher query and it establishes
@@ -118,7 +138,5 @@ public class CypherQueryHandler implements AutoCloseable{
 
     @Override
     public void close() { driver.close(); }
-
-
 
 }

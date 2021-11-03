@@ -21,6 +21,7 @@ do
           -e "FORCE_RESTART=true" \
           -e "KAFKA_CONNECT_NEO4J_BOLT=bolt://neo4j-sink:7687" \
           -e "STOP_DATETIME=2021-01-01T10:00:00Z" \
+          -e "IS_SUMMARY_TEST=true" \
         dozer
 done
 

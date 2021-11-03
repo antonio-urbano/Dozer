@@ -54,11 +54,9 @@ public class CypherHandlerProcessor implements Processor<String, CurrentAgent> {
                 && currentAgent.getStatus().equals("completed")){
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", (currentAgent.getTimestampToSync()));
-//            try {
-                this.cypherHandler.cypherResultIntoKafka(currentAgent.getTimestampToSync());
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            if (DozerConfig.isSummaryTest().equals("true"))
+                this.cypherHandler.resultSummaryIntoKafka(currentAgent.getTimestampToSync());
+            else this.cypherHandler.cypherResultIntoKafka(currentAgent.getTimestampToSync());
             this.kvStore.put("key", updatedAgent);
             this.context.forward("key", updatedAgent);
             this.context.commit();
