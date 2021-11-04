@@ -1,9 +1,9 @@
-REGISTER QUERY <summary_PT6H_linear_tumbling_1> {
+REGISTER QUERY <summary_PT15M_linear_tumbling_4> {
     FROM STREAM <linear-test-dataset>
     STARTING FROM Earliest
-    WITH WINDOW RANGE PT6H
+    WITH WINDOW RANGE PT15M
     MATCH (p:Person)-[r:IS_WITH]->(p2:Person) RETURN p,r,p2;
     EMIT ON EXIT
-    EVERY PT6H
-    INTO <summary_PT6H_linear_tumbling_1>
+    EVERY PT15M
+    INTO <summary_PT15M_linear_tumbling_4>
 }
