@@ -61,7 +61,7 @@ public class SeraphPayloadHandler {
         consumer.assign(Collections.singletonList(topicPartitionToConsume));
 
         consumer.seek(topicPartitionToConsume, consumer.endOffsets(Collections.singletonList(topicPartitionToConsume)).get(topicPartitionToConsume)-1);
-        ConsumerRecords<String, ?> records = consumer.poll(Duration.ofMillis(2000));
+        ConsumerRecords<String, ?> records = consumer.poll(Duration.ofMillis(500));
         if(!records.isEmpty())
             return records.records(topicPartitionToConsume).get(0);
         else return null;       //todo handle empty record
@@ -73,7 +73,7 @@ public class SeraphPayloadHandler {
         consumer.assign(Collections.singletonList(topicPartitionToConsume));
 
         consumer.seek(topicPartitionToConsume, consumer.beginningOffsets(Collections.singletonList(topicPartitionToConsume)).get(topicPartitionToConsume));
-        ConsumerRecords<String, ?> records = consumer.poll(Duration.ofMillis(2000));
+        ConsumerRecords<String, ?> records = consumer.poll(Duration.ofMillis(500));
         consumer.close();
         if(!records.isEmpty())
             return records.records(topicPartitionToConsume).get(0);
