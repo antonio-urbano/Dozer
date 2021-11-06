@@ -53,7 +53,7 @@ public class SyncEventInputReader {
         Long counter=0L;
         Long[] return_values = new Long[2];
         while (true) {
-            ConsumerRecords<String, CdcCreateRecord> records = consumer.poll(Duration.ofMillis(100));
+            ConsumerRecords<String, CdcCreateRecord> records = consumer.poll(Duration.ofMillis(600));
             if (!records.isEmpty()) {
                 for (ConsumerRecord<String, CdcCreateRecord> r : records.records(topicPartition)) {
                     if (counter<emitEveryEventRange) {
