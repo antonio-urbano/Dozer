@@ -42,7 +42,6 @@ public class DozerApplication {
         props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, keySerde);
         props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, valueSerde);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 10); //todo
-        props.put(StreamsConfig.SECURITY_PROTOCOL_CONFIG, "SSL"); //todo
         props.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offset);
 
         return props;
