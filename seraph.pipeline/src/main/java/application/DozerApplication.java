@@ -42,6 +42,7 @@ public class DozerApplication {
         props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, keySerde);
         props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, valueSerde);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1); //todo
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 1000000); //todo
         props.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offset);
 
         return props;

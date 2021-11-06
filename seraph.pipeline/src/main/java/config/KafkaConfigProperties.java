@@ -52,6 +52,7 @@ public class KafkaConfigProperties {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1);  //todo
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 1000000); //todo
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, deserializerClass);
 
         return props;
