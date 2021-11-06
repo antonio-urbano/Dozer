@@ -26,6 +26,8 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
     private final String agentStoreName;
     private final String offsetStoreName;
 
+    private TimeManagedConsumer timeManagedConsumer;
+
     public TimeManagedProcessorDeletion(String agentStoreName, String offsetStoreName) {
         this.agentStoreName = agentStoreName;
         this.offsetStoreName = offsetStoreName;
@@ -43,6 +45,9 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
         kafkaProducer.send(new ProducerRecord<>(DozerConfig.getWorkFlowTopic(), agent));
         kafkaProducer.flush();
         kafkaProducer.close();
+        this.timeManagedConsumer = new TimeManagedConsumer(
+                new TopicPartition(DozerConfig.getCdcDeleteRelationshipsTopic(), 0),
+                "deletion");
 
     }
 
@@ -53,9 +58,8 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
         if((currentAgent.getAgentName().equals(SyncGeneratorProcessorEvent.class.getSimpleName())
                 || currentAgent.getAgentName().equals(SyncGeneratorProcessorTime.class.getSimpleName()))
                 && currentAgent.getStatus().equals("completed")){
-            Long offsetToRead = TimeManagedConsumer.delayedStream_seek
-                    (new TopicPartition(DozerConfig.getCdcDeleteRelationshipsTopic(), 0),
-                            DozerConfig.getNeo4jPluginRelationshipsTopic(),
+            Long offsetToRead = this.timeManagedConsumer.delayedStream_seek
+                    (DozerConfig.getNeo4jPluginRelationshipsTopic(),
                             currentAgent.getTimestampToSync(),
                             this.offsetKvStore.get("value-deletion"),"deletion");
             this.offsetKvStore.put("value-deletion", offsetToRead);
@@ -68,6 +72,6 @@ public class TimeManagedProcessorDeletion implements Processor<String, CurrentAg
     }
 
 
-        @Override
+    @Override
     public void close() { }
 }

@@ -25,10 +25,15 @@ public class TimeManagedProcessorInsertion implements Processor<String, CurrentA
 
     private final String agentStoreName;
     private final String offsetStoreName;
+    private TimeManagedConsumer timeManagedConsumer;
 
     public TimeManagedProcessorInsertion(String agentStoreName, String offsetStoreName) {
         this.agentStoreName = agentStoreName;
         this.offsetStoreName = offsetStoreName;
+        this.timeManagedConsumer = new TimeManagedConsumer(
+                new TopicPartition(DozerConfig.getCdcCreateRelationshipsTopic(), 0),
+                "insertion");
+
     }
 
     @Override
@@ -51,9 +56,8 @@ public class TimeManagedProcessorInsertion implements Processor<String, CurrentA
         //todo handle "key", "value"
         if(currentAgent.getAgentName().equals(TimeManagedProcessorDeletion.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
-            Long offsetToRead = TimeManagedConsumer.delayedStream_seek
-                    (new TopicPartition(DozerConfig.getCdcCreateRelationshipsTopic(), 0),
-                            DozerConfig.getNeo4jPluginRelationshipsTopic(), currentAgent.getTimestampToSync(), this.offsetKvStore.get("value-insertion"), "insertion");
+            Long offsetToRead = this.timeManagedConsumer.delayedStream_seek(
+                    DozerConfig.getNeo4jPluginRelationshipsTopic(), currentAgent.getTimestampToSync(), this.offsetKvStore.get("value-insertion"), "insertion");
             this.offsetKvStore.put("value-insertion", offsetToRead);
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", currentAgent.getTimestampToSync());

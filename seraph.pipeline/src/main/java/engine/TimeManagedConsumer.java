@@ -19,12 +19,21 @@ import java.util.Collections;
  * This class is used to handle the consumption from Kafka at proper timestamp
  */
 public class TimeManagedConsumer {
+    private Consumer<String, Object> consumer;
+    private TopicPartition topicPartition;
+    public TimeManagedConsumer(TopicPartition topicPartition, String consumerDelayedType){
+        this.topicPartition = topicPartition;
+        ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class, consumerDelayedType));
+        Consumer<String, Object> consumer = cf.createConsumer(); //todo
+        consumer.assign(Collections.singletonList(topicPartition));
+    }
 
     /**
      * This method consumes all the records with a timestamp less than the timestampToSync and send them to the outputTopic.
      * It stops to consume when a record with a greater timestamp is found and
      * it returns the corresponding offsetToRead
-     * @param topicPartition topic partition from which consume
+    //todo * @param topicPartition topic partition from which consume
+
      * @param outputTopic topic name to which publish the consumed records at proper timestamp
      * @param timestampToSync the last timestamp to which all the components has to synchronize
      * @param offsetToRead offset from which start to read (initially set to 0)
@@ -32,11 +41,8 @@ public class TimeManagedConsumer {
      * with a timestamp greater than the timestampToSync
      */
 
-    public static Long delayedStream_seek(TopicPartition topicPartition, String outputTopic, Long timestampToSync, Long offsetToRead, String typeDelayed) {
+    public Long delayedStream_seek(String outputTopic, Long timestampToSync, Long offsetToRead, String typeDelayed) {
 
-        ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class, typeDelayed));
-        Consumer<String, Object> consumer = cf.createConsumer(); //todo
-        consumer.assign(Collections.singletonList(topicPartition));
 
         Producer<String, Object> producer = new KafkaProducer<>(KafkaConfigProperties.getKafkaProducerProperties("time_managed_consumer_"+typeDelayed));//todo
 
