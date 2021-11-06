@@ -25,7 +25,7 @@ public class KafkaConfigProperties {
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, DozerConfig.getSeraphQuery().getQueryID() + "_"+applicationId);
         properties.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, DozerConfig.getKafkaBroker());
         properties.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
-//        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");      //todo
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");      //todo
         return properties;
     }
 
@@ -51,6 +51,7 @@ public class KafkaConfigProperties {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, DozerConfig.getSeraphQuery().getQueryID() +"_"+applicationId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 10);  //todo
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, deserializerClass);
 
         return props;
