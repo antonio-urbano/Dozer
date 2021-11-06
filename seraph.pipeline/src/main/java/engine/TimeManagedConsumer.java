@@ -46,7 +46,7 @@ public class TimeManagedConsumer {
 
         consumer.seek(topicPartition, offsetToRead);
         while (true) {
-            ConsumerRecords<String, Object> records = consumer.poll(Duration.ofMillis(100));
+            ConsumerRecords<String, Object> records = consumer.poll(Duration.ofMillis(1000));
             if (!records.isEmpty()) {
                 for (ConsumerRecord<String, Object> r : records.records(topicPartition)) {
                     if (r.timestamp() < timestampToSync) {
