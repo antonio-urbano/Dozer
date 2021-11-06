@@ -45,7 +45,7 @@ public class DozerSetup {
 
         ConsumerRecords<String, Object> records;
         do {
-            records = consumer.poll(Duration.ofMillis(500));
+            records = consumer.poll(Duration.ofMillis(100));
             for (ConsumerRecord<String, Object> record : records.records(TOPIC_PARTITION)) {
                 CurrentAgent currentAgent = (CurrentAgent) record.value();
                 if (currentAgent.getAgentName().equals(START_AGENT_NAME)) {
