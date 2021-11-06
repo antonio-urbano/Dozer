@@ -11,6 +11,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
+import org.apache.kafka.streams.processor.To;
 import org.apache.kafka.streams.state.KeyValueStore;
 import seraphGrammar.Start;
 
@@ -37,6 +38,7 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
     private final String offsetStoreName;
     private final String inputStream;
     private final Start windowStart;
+    private SyncEventInputReader eventInputReader;
 
     public SyncGeneratorProcessorEvent(Long emitEveryEventRange, String agentStoreName,
                                        String offsetStoreName, String inputStream, Start windowStart) {
@@ -60,6 +62,7 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
         kafkaProducer.send(new ProducerRecord<>(DozerConfig.getWorkFlowTopic(), agent));
         kafkaProducer.flush();
         kafkaProducer.close();
+        this.eventInputReader = new SyncEventInputReader(new TopicPartition(DozerConfig.getCdcCreateRelationshipsTopic(), 0));
     }
 
 
@@ -77,15 +80,14 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
                 System.exit(1);
             }
             this.kvStore.put("key", updatedAgent);
-            this.context.forward("key", updatedAgent);
+            this.context.forward("key", updatedAgent, To.all().withTimestamp(System.currentTimeMillis()));
             this.context.commit();
 
         }
         if(currentAgent.getAgentName().equals(CypherHandlerProcessor.class.getSimpleName())
                 && currentAgent.getStatus().equals("completed")){
-            this.timestampToSync_offsetToRead = SyncEventInputReader.readCreateEvent
-                    (new TopicPartition(DozerConfig.getCdcCreateRelationshipsTopic(), 0),
-                            this.emitEveryEventRange, this.offsetKvStore.get("value-sync-generator-event"));
+            this.timestampToSync_offsetToRead = this.eventInputReader.readCreateEvent
+                    (this.emitEveryEventRange, this.offsetKvStore.get("value-sync-generator-event"));
 
             Long timestampToSync = this.timestampToSync_offsetToRead[0];
             Long offsetToRead = this.timestampToSync_offsetToRead[1];
@@ -100,7 +102,7 @@ public class SyncGeneratorProcessorEvent implements Processor<String, CurrentAge
                 }
             }
             this.kvStore.put("key", updatedAgent);
-            this.context.forward("key",updatedAgent);
+            this.context.forward("key", updatedAgent, To.all().withTimestamp(System.currentTimeMillis()));
             this.context.commit();
 
         }

@@ -10,6 +10,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
+import org.apache.kafka.streams.processor.To;
 import org.apache.kafka.streams.state.KeyValueStore;
 
 /**
@@ -62,7 +63,7 @@ public class TimeManagedProcessorInsertion implements Processor<String, CurrentA
             CurrentAgent updatedAgent = new CurrentAgent(this.getClass().getSimpleName(),
                     "completed", currentAgent.getTimestampToSync());
             this.kvStore.put("key", updatedAgent);
-            this.context.forward("key",updatedAgent);
+            this.context.forward("key", updatedAgent, To.all().withTimestamp(System.currentTimeMillis()));
             this.context.commit();
         }
     }

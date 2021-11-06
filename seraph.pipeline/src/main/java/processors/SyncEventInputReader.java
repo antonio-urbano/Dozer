@@ -26,6 +26,14 @@ aggiorna il timestamp_to_synch e l'offset_to_read
  */
 
 public class SyncEventInputReader {
+    private Consumer<String, CdcCreateRecord> consumer;
+    private TopicPartition topicPartition;
+    public SyncEventInputReader(TopicPartition topicPartition){
+        this.topicPartition = topicPartition;
+        ConsumerFactory<String, CdcCreateRecord> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class, "syncEventReader"));
+        this.consumer = cf.createConsumer();
+        consumer.assign(Collections.singletonList(topicPartition));
+    }
 
     /**
      * Method called by the {@link SyncGeneratorProcessorEvent} to read from the CDC "create events" stream,
@@ -33,16 +41,12 @@ public class SyncEventInputReader {
      * Every time a new record is read, an internal counter is incremented. Once the counter is equal
      * to the emitEveryEventRange, the method returns both the updated offsetToRead and the timestamp associated
      * to the last consumed record
-     * @param topicPartition associated to the input topic from which consume
+     //todo * @param topicPartition associated to the input topic from which consume
      * @param emitEveryEventRange defines the frequency of the evaluation process
      * @param offsetToRead offset from which start to read (initially set to 0)
      * @return both the updated offsetToRead and the timestamp associated to the last consumed record
      */
-    static Long[] readCreateEvent(TopicPartition topicPartition, Long emitEveryEventRange, Long offsetToRead) {
-
-        ConsumerFactory<String, CdcCreateRecord> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class, "syncEventRead"));
-        Consumer<String, CdcCreateRecord> consumer = cf.createConsumer(); //todo maybe move into constructor as in TimeManaged?
-        consumer.assign(Collections.singletonList(topicPartition));
+    public Long[] readCreateEvent(Long emitEveryEventRange, Long offsetToRead) {
 
 
         if(offsetToRead==null)

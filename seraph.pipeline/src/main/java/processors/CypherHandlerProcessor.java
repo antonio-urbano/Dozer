@@ -9,6 +9,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
+import org.apache.kafka.streams.processor.To;
 import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class CypherHandlerProcessor implements Processor<String, CurrentAgent> {
                 this.cypherHandler.resultSummaryIntoKafka(currentAgent.getTimestampToSync());
             else this.cypherHandler.cypherResultIntoKafka(currentAgent.getTimestampToSync());
             this.kvStore.put("key", updatedAgent);
-            this.context.forward("key", updatedAgent);
+            this.context.forward("key", updatedAgent, To.all().withTimestamp(System.currentTimeMillis()));
             this.context.commit();
         }
     }

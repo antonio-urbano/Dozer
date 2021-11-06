@@ -10,6 +10,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
+import org.apache.kafka.streams.processor.To;
 import org.apache.kafka.streams.state.KeyValueStore;
 import seraphGrammar.Start;
 
@@ -64,7 +65,7 @@ public class SyncGeneratorProcessorTime implements Processor<String, CurrentAgen
                 System.exit(1);
             }
             this.kvStore.put("key", updatedAgent);
-            this.context.forward("key", updatedAgent);
+            this.context.forward("key", updatedAgent, To.all().withTimestamp(System.currentTimeMillis()));
             this.context.commit();
 
         }
@@ -79,7 +80,7 @@ public class SyncGeneratorProcessorTime implements Processor<String, CurrentAgen
                 }
             }
             this.kvStore.put("key", updatedAgent);
-            this.context.forward("key", updatedAgent);
+            this.context.forward("key", updatedAgent, To.all().withTimestamp(System.currentTimeMillis()));
             this.context.commit();
 
         }
