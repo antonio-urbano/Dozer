@@ -24,7 +24,7 @@ public class TimeManagedConsumer {
     public TimeManagedConsumer(TopicPartition topicPartition, String consumerDelayedType){
         this.topicPartition = topicPartition;
         ConsumerFactory<String, Object> cf = new DefaultKafkaConsumerFactory<>(KafkaConfigProperties.getKafkaConsumerProperties(CdcCreateRecord.class, consumerDelayedType));
-        Consumer<String, Object> consumer = cf.createConsumer(); //todo
+        this.consumer = cf.createConsumer(); //todo
         consumer.assign(Collections.singletonList(topicPartition));
     }
 
