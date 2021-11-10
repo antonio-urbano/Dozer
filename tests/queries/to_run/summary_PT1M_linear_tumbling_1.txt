@@ -1,9 +1,9 @@
-REGISTER QUERY <linear_PT5M_2H> {
+REGISTER QUERY <fault_PT10S_2H> {
     FROM STREAM <linear-test-dataset>
     STARTING FROM Earliest
-    WITH WINDOW RANGE PT5M
+    WITH WINDOW RANGE PT10S
     MATCH (p:Person)-[r:IS_WITH]->(p2:Person) RETURN p,r,p2;
     EMIT ON EXIT
-    EVERY PT5M
-    INTO <linear_PT5M_2H>
+    EVERY PT10S
+    INTO <fault_PT10S_2H>
 }
