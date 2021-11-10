@@ -130,7 +130,7 @@ public class DozerApplication {
             DozerSetup.deleteNeo4jPlugin();
             DozerSetup.deleteTopics();
             DozerSetup.deleteAllFromNeo4j();
-            Thread.sleep(1000);
+            Thread.sleep(1200);
         }
 
         if (DozerSetup.isFreshStart()) {
@@ -138,7 +138,7 @@ public class DozerApplication {
             DozerSetup.createTopics();
             DozerSetup.createNeo4jPlugin();
             DozerSetup.createStartMessage();
-//            Thread.sleep(00);
+            Thread.sleep(1200);
         }
 
         System.out.println("STARTING");
