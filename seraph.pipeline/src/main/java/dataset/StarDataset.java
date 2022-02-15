@@ -20,13 +20,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class StarDataset {
     //star-test-dataset-small: (PRODUCTION period = 30000ms), every minute 2 nodes linked to 3 other nodes per PT1H = 360 nodes
-    //star-test-dataset: (PRODUCTION period = 50ms) every second 20 nodes linked to 15 other nodes per P1DT0S = 34560000 nodes in 1728000 events
+    //star-test-dataset: (PRODUCTION period = 250ms) every second 4 nodes linked to 5 other nodes per P1DT0S = 1728000 nodes in 345600 events
     public static String TOPIC = "star-test-dataset";
     public static String BROKER = "localhost:9092";
     public static Instant START_INSTANT = Instant.parse("2021-01-01T00:00:00Z");
     public static Duration TIME_RANGE = Duration.parse("P1DT0S");
-    public static Long PRODUCTION_PERIOD_MS = 50L;
-    public final static int RELATIONSHIPS_PER_NODE = 20;
+    public static Long PRODUCTION_PERIOD_MS = 250L;
+    public final static int RELATIONSHIPS_PER_NODE = 5;
 
 
     public static void main(String[] args) {
@@ -72,25 +72,12 @@ public class StarDataset {
         labelsPerson.add("Person");
         Map<String, ArrayList<Object>> propertiesPerson = new HashMap<>();
         ArrayList<Object> nameProperties;
-//        nameProperties.add("P" + txEventNodeId);
         ArrayList<Object> timestampProperties;
-//        timestampProperties.add(initTimestamp.get());
-//        propertiesPerson.put("name", nameProperties);
-//        propertiesPerson.put("timestamp", timestampProperties);
-//        PgNode node = new PgNode(txEventNodeId.get(), labelsPerson, propertiesPerson);
-//        ArrayList<PgNode> nodes = new ArrayList<>();
-//        nodes.add(node);
-//        JsonPG jsonPG = new JsonPG(nodes, new ArrayList<>());
+
         ArrayList<PgNode> nodes;
         ArrayList<PgEdge> edges;
         JsonPG jsonPG;
-//
-//        kafkaProducer.send(new ProducerRecord<>(TOPIC,
-//                0,
-//                initTimestamp.get(),
-//                null,
-//                jsonPG));
-//        kafkaProducer.flush();
+
 
         while (initTimestamp.get() < START_INSTANT.plus(TIME_RANGE).toEpochMilli()) {
             nodes = new ArrayList<>();
@@ -134,24 +121,6 @@ public class StarDataset {
             txEventNodeId++;
             txEventEdgeId++;
         }
-//        timestampProperties = new ArrayList<>();
-//        initTimestamp.set(START_INSTANT.plus(TIME_RANGE).toEpochMilli());
-//        timestampProperties.add(0, initTimestamp.get());
-//
-//        nameProperties = new ArrayList<>();
-//        nameProperties.add(0,"P" + (txEventNodeId + internalNodeCounter));
-//        propertiesPerson = new HashMap<>();
-//        propertiesPerson.put("name", nameProperties);
-//        propertiesPerson.put("timestamp", timestampProperties);
-//
-//        PgNode node = new PgNode((txEventNodeId + internalNodeCounter), labelsPerson, propertiesPerson);
-//        nodes = new ArrayList<>();
-//        nodes.add(node);
-//        kafkaProducer.send(new ProducerRecord<>(TOPIC,
-//                0,
-//                initTimestamp.get(),
-//                null,
-//                new JsonPG(nodes, new ArrayList<>())));
-//        kafkaProducer.flush();
+
     }
 }
