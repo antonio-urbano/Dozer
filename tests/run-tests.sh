@@ -1,7 +1,7 @@
 # immagina dozer gia buildata
 
 echo "Starting tests!"
-for file in ./queries/to_run/*
+for file in ./queries/*
 do
     echo "Found file $file"
     query=$(<$file)
